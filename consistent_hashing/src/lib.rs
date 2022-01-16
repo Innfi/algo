@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use consistent_hash::{Node, StaticHashRing, DefaultHash};
-    use sha1::{Sha1, Digest};
-    use hex_literal::hex;
+    // use sha1::{Sha1, Digest};
+    // use hex_literal::hex;
 
     #[test]
     fn test_rust_crate() {
@@ -21,15 +21,15 @@ mod tests {
             [&"foo", &"bar", &"baz"]);    
     }
 
-    #[test]
-    fn test_sha1() {
-        let mut hasher = Sha1::new();
-        hasher.input(b"hello world");
+    // #[test]
+    // fn test_sha1() {
+    //     let mut hasher = Sha1::new();
+    //     hasher.input(b"hello world");
 
-        let result = hasher.result();
+    //     let result = hasher.result();
 
-        assert_eq!(result[..], hex!("2233"));
-    }
+    //     assert_eq!(result[..], hex!("2233"));
+    // }
 
     #[test]
     fn test_baseline() {
@@ -41,5 +41,65 @@ mod tests {
         let input1: i32 = 21;
 
         assert_eq!(input1 << 2, 84);
+    }
+
+    #[test]
+    fn test_traits() {
+        trait Speaks {
+            fn speak(&self);
+            fn noise(&self) -> &str;
+        }
+
+        trait Animal {
+            fn animal_type(&self) -> &str;
+        }
+
+        struct Dog {}
+
+        impl Animal for Dog {
+            fn animal_type(&self) -> &str {
+                "dog"
+            }
+        }
+
+        impl Speaks for Dog {
+            fn speak(&self) {
+                println!("dog::speaks");
+            }
+
+            fn noise(&self) -> &str {
+                "bark"
+            }
+        }
+
+        let a_dog = Dog {};
+        assert_eq!(a_dog.animal_type(), "dog");
+        assert_eq!(a_dog.noise(), "bark");
+    }
+
+    #[test]
+    fn try_apply_trait_to_consistent_hash() {
+        trait NodeType {
+            fn to_type(&self) -> String;
+        }
+
+        struct NodeValue {
+            node_type: String,
+        }
+
+        impl NodeValue {
+            pub fn new() -> Self {
+                Self { node_type: String::from("hashKey"), }
+            }
+        }
+
+        impl NodeType for NodeValue {
+            fn to_type(&self) -> String {
+                self.node_type.clone()
+            }
+        }
+
+        let node_instance = NodeValue::new();
+        assert_eq!(node_instance.to_type(), String::from("hashKey"));
     }
 }
