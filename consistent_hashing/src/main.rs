@@ -1,11 +1,8 @@
-/**
+/*
 TODO
 -------------------------------------------------------------------------------
 ring buffer 
 assign a node (cache server, specifically) to buffer
-
-
-
 
 assign a key to node
 assign a hash value to node 
@@ -17,24 +14,53 @@ DONE
 -------------------------------------------------------------------------------
  */
 
-// pub struct NodeKey {
-//     value: String,
-// }
 
-// pub struct NodeServer {
-//     url: String,
-// }
+trait NodeTrait {
+    fn to_type(&self) -> &str;
+}
 
-// pub struct Controller {
-//     buffer: Vec<String>,
-//     nodeCount: u32,
-// }
+struct NodeServer {
+    url: String,
+}
 
-// impl Controller {
-//     pub fn addServer(&mut self, server: NodeServer) {
-//         self.buffer.push(server.url);
-//     }
-// }
+impl NodeTrait for  NodeServer {
+    fn to_type(&self) -> &str {
+        "node_server"
+    }
+}
+
+struct NodeHash {
+    key: String,
+    value: String,
+}
+
+impl NodeTrait for NodeHash {
+    fn to_type(&self) -> &str {
+        "node_hash"
+    }
+}
+
+struct ConsistentHash {
+    buffer: Vec<Box<dyn NodeTrait>>,
+}
+
+impl ConsistentHash {
+    pub fn new() -> Self {
+        Self { buffer: Vec::new()}
+    }
+
+    pub fn add_server(&self, new_server: NodeServer) {
+        self.add_node_to_buffer(new_server);
+    }
+
+    fn add_node_to_buffer(&self, arg: impl NodeTrait) {
+
+    }
+
+    pub fn get_value(&mut self) {
+
+    }
+}
 
 fn main() {
     println!("Hello, world!");
