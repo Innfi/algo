@@ -1,5 +1,15 @@
+mod innfis_hash;
+
+#[test]
+    fn test_mod() {
+        let instance = innfis_hash::ConsistentHash::new();
+
+        assert_eq!(instance.initial_runner(), String::from("start from here"));
+    }
+
+
 #[cfg(test)]
-mod tests {
+mod tests {    
     use consistent_hash::{Node, StaticHashRing, DefaultHash};
     // use sha1::{Sha1, Digest};
     // use hex_literal::hex;
