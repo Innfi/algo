@@ -1,18 +1,18 @@
 mod innfis_hash;
 
 #[test]
-    fn test_mod() {
-        let instance = innfis_hash::ConsistentHash::new();
+fn test_mod() {
+    let instance = innfis_hash::ConsistentHash::new();
 
-        assert_eq!(instance.initial_runner(), String::from("start from here"));
-    }
+    assert_eq!(instance.initial_runner(), String::from("start from here"));
+}
 
 
 #[cfg(test)]
 mod tests {    
     use consistent_hash::{Node, StaticHashRing, DefaultHash};
-    // use sha1::{Sha1, Digest};
-    // use hex_literal::hex;
+    use sha1::{Sha1, Digest};
+    //use hex_literal::hex;
 
     #[test]
     fn test_rust_crate() {
@@ -31,15 +31,16 @@ mod tests {
             [&"foo", &"bar", &"baz"]);    
     }
 
-    // #[test]
-    // fn test_sha1() {
-    //     let mut hasher = Sha1::new();
-    //     hasher.input(b"hello world");
+    #[test]
+    fn test_sha1() {
+        let mut hasher = Sha1::new();
+        let test_input = b"hello world";
+        hasher.input(test_input);
 
-    //     let result = hasher.result();
-
-    //     assert_eq!(result[..], hex!("2233"));
-    // }
+        let result = hasher.result();
+        
+        //assert_eq!(result[..], hex!("2233"));
+    }
 
     #[test]
     fn test_baseline() {

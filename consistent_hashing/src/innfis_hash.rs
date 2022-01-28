@@ -1,68 +1,33 @@
-pub struct ConsistentHash {}
+use std::collections::HashMap;
+
+struct Node {
+  url: String,
+}
+
+pub struct ConsistentHash {
+  rings: HashMap<String, Node>,
+}
 
 impl ConsistentHash {
   pub fn new() -> Self {
-    Self {  }
+    Self { rings: HashMap::new() }
   }
 
   pub fn initial_runner(&self) -> String {
     String::from("start from here")
   }
+
+  pub fn add_node(&mut self, new_server: Node) {    
+    self.rings.insert(self.to_hash(), new_server);
+  }
+
+  pub fn remove_node(&mut self, target_server: Node) {
+    let key = self.to_hash();
+    self.rings.remove_entry(&key);
+  }
+
+  fn to_hash(&self) -> String {
+    //TODO: hash
+    String::from("test")
+  }
 }
-
-//use std::collections::HashMap;
-
-// trait NodeTrait {
-//     fn to_type(&self) -> &str;
-// }
-
-// struct NodeServer {
-//     url: String,
-// }
-
-// impl NodeTrait for  NodeServer {
-//     fn to_type(&self) -> &str {
-//         "node_server"
-//     }
-// }
-
-// struct NodeHash {
-//     key: String,
-//     value: String,
-// }
-
-// impl NodeTrait for NodeHash {
-//     fn to_type(&self) -> &str {
-//         "node_hash"
-//     }
-// }
-
-// struct ConsistentHash {
-//     //test_map: HashMap<u32>,
-//     //buffer: Vec<Box<dyn NodeTrait>>,
-// }
-
-// impl ConsistentHash {
-//   pub fn check_runner() {
-//     println!("ConsistentHash::check_runner")
-//   }
-
-//     // pub fn new() -> Self {
-//     //     Self { 
-//     //         //test_map: HashMap<u32>::new(),
-//     //         buffer: Vec::new()
-//     //     }
-//     // }
-
-//     // pub fn add_server(&self, new_server: NodeServer) {
-//     //     self.add_node_to_buffer(new_server);
-//     // }
-
-//     // fn add_node_to_buffer(&self, arg: impl NodeTrait) {
-
-//     // }
-
-//     // pub fn get_value(&mut self) {
-
-//     // }
-// }
