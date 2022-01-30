@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-struct Node {
-  url: String,
+pub struct Node {
+  pub url: String,
 }
 
 pub struct ConsistentHash {
@@ -17,8 +17,15 @@ impl ConsistentHash {
     String::from("start from here")
   }
 
-  pub fn add_node(&mut self, new_server: Node) {    
-    self.rings.insert(self.to_hash(), new_server);
+  pub fn add_node(&mut self, new_server: Node) -> Option<bool> {    
+    let key_string = self.to_hash();
+
+    if self.rings.contains_key(&key_string) {
+      None
+    } else {
+      self.rings.insert(key_string, new_server);
+      Some(true)
+    }
   }
 
   pub fn remove_node(&mut self, target_server: Node) {

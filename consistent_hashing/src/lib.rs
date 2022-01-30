@@ -7,6 +7,17 @@ fn test_mod() {
     assert_eq!(instance.initial_runner(), String::from("start from here"));
 }
 
+#[test]
+fn test_add_node() {
+    let mut instance = innfis_hash::ConsistentHash::new();
+
+    let test_node = innfis_hash::Node {
+        url: String::from("localhost:6379"),
+    };
+
+    assert_eq!(instance.add_node(test_node).unwrap(), true);
+}
+
 
 #[cfg(test)]
 mod tests {    
