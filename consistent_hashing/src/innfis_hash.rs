@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 pub struct Node {
   pub url: String,
+  pub keys: Vec<String>,
 }
 
 pub struct ConsistentHash {
@@ -18,7 +19,7 @@ impl ConsistentHash {
   }
 
   pub fn add_node(&mut self, new_server: Node) -> Option<bool> {    
-    let key_string = self.to_hash();
+    let key_string = self.to_hashkey(&new_server);
 
     if self.rings.contains_key(&key_string) {
       None
@@ -29,12 +30,18 @@ impl ConsistentHash {
   }
 
   pub fn remove_node(&mut self, target_server: Node) {
-    let key = self.to_hash();
+    let key = self.to_hashkey(&target_server);
     self.rings.remove_entry(&key);
   }
 
-  fn to_hash(&self) -> String {
+  fn to_hashkey(&self, new_server: &Node) -> String {
     //TODO: hash
-    String::from("test")
+    new_server.url.clone()
+  }
+
+  pub fn load_value(&self, key: String) -> Option<String> {
+    //TODO: find node for key
+
+    Some(String::from("todo"))
   }
 }
