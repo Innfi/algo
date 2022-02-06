@@ -1,23 +1,63 @@
 mod innfis_hash;
 
 #[test]
-fn test_mod() {
-    let instance = innfis_hash::ConsistentHash::new();
+fn test_instiatiate() {
+    let instance = innfis_hash::ConsistentHash::new(vec![]);
 
-    assert_eq!(instance.initial_runner(), String::from("start from here"));
+    assert_eq!(instance.rings.is_empty(), true);
+}
+
+#[test]
+fn test_constructor() {
+    let node1 = innfis_hash::Node {
+        url: String::from("test_url1"),
+    };
+    let node2 = innfis_hash::Node {
+        url: String::from("test_url2"),
+    };
+    let input_vec = vec![node1, node2];
+    let input_len = input_vec.len();
+
+    let instance = innfis_hash::ConsistentHash::new(input_vec);
+    assert_eq!(input_len, instance.rings.len());
 }
 
 #[test]
 fn test_add_node() {
-    let mut instance = innfis_hash::ConsistentHash::new();
+    let input = create_node_input();
 
-    let test_node = innfis_hash::Node {
-        url: String::from("localhost:6379"),
+    let mut instance = innfis_hash::ConsistentHash::new(input);
+    assert_eq!(instance.rings.is_empty(), false);
+
+    let new_node = innfis_hash::Node {
+        url: String::from("test8"),
     };
 
-    assert_eq!(instance.add_node(test_node).unwrap(), true);
+    let add_result = instance.add_node(new_node);
+    assert_eq!(add_result, Ok(0));
 }
 
+fn create_node_input() -> Vec<innfis_hash::Node> {
+    let input_vec = vec![
+        innfis_hash::Node {
+            url: String::from("test1"),
+        },
+        innfis_hash::Node {
+            url: String::from("test5"),
+        },
+        innfis_hash::Node {
+            url: String::from("test10"),
+        },
+        innfis_hash::Node {
+            url: String::from("test3"),
+        },
+        innfis_hash::Node {
+            url: String::from("test7"),
+        },
+    ];
+
+    input_vec
+}
 
 #[cfg(test)]
 mod tests {    
@@ -100,7 +140,7 @@ mod tests {
     }
 
     #[test]
-    fn try_apply_trait_to_consistent_hash() {
+    fn try_apply_trait() {
         trait NodeType {
             fn to_type(&self) -> String;
         }
@@ -123,5 +163,21 @@ mod tests {
 
         let node_instance = NodeValue::new();
         assert_eq!(node_instance.to_type(), String::from("hashKey"));
+    }
+
+    #[test]
+    fn vec_binary_search() {
+        let mut preset = vec![ 5, 4, 7, 1, 10, 99, 51 ];
+        preset.sort();
+
+        let input = 41;
+        let result = preset.binary_search(&input);
+        assert_eq!(result, Err(5));
+
+        let out_index = result.unwrap_or_else(|x| x);
+        assert_eq!(out_index, 5);
+
+        preset.insert(out_index, input);
+        assert_eq!(preset, [1, 4, 5, 7, 10, 41, 51, 99]);
     }
 }
