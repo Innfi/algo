@@ -62,11 +62,14 @@ fn create_node_input() -> Vec<innfis_hash::Node> {
 #[cfg(test)]
 mod tests {    
     use consistent_hash::{Node, StaticHashRing, DefaultHash};
-    use sha1::{Sha1, Digest};
+    //use sha1::{Sha1, Digest};
     //use hex_literal::hex;
-
+    use crypto::digest::Digest;
+    use crypto::sha1::Sha1;
+    use std::str;
+    
     #[test]
-    fn test_rust_crate() {
+    fn consistent_hash_from_crate() {
         let nodes = vec![
             Node::new("foo").quantity(5),
             Node::new("bar").quantity(5),
@@ -80,29 +83,6 @@ mod tests {
             [&"bar", &"baz", &"foo"]);
         assert_eq!(ring.calc_candidates(&"bb").map(|x| &x.key).collect::<Vec<_>>(),
             [&"foo", &"bar", &"baz"]);    
-    }
-
-    #[test]
-    fn test_sha1() {
-        let mut hasher = Sha1::new();
-        let test_input = b"hello world";
-        hasher.input(test_input);
-
-        let result = hasher.result();
-        
-        //assert_eq!(result[..], hex!("2233"));
-    }
-
-    #[test]
-    fn test_baseline() {
-        let input: i32 = 1;
-
-        assert_eq!(input << 1, 2);
-        assert_eq!(input << 2, 4);
-
-        let input1: i32 = 21;
-
-        assert_eq!(input1 << 2, 84);
     }
 
     #[test]
@@ -180,4 +160,44 @@ mod tests {
         preset.insert(out_index, input);
         assert_eq!(preset, [1, 4, 5, 7, 10, 41, 51, 99]);
     }
+
+    #[test]
+    fn test_crypto_sha1() {
+        // create a Sha1 object
+        let mut hasher = Sha1::new();
+
+        hasher.input_str("hello world");
+        let result = hasher.result_str();
+
+        assert_eq!(result, "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+
+        hasher.reset();
+        hasher.input_str("hello world1");
+        let result1 = hasher.result_str();
+
+        assert_eq!(result1, "c25325615b8492da77c2280a425a3aa82efda6d3");
+    }
+
+    // #[test]
+    // fn test_sha1() {
+    //     let mut hasher = Sha1::new();
+    //     let test_input = b"hello world";
+        
+    //     hasher.update(test_input);
+    //     let result = hasher.finalize();
+    //     let result_spread = &result[..];
+    //     let expected = hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+
+    //     result_spread.into_iter().for_each(|x| {
+    //         println!("element: {}", x);
+    //     });
+
+    //     let resul1_as_str = str::from_utf8(result_spread);
+
+    //     if resul1_as_str.is_ok() { println!("result ok"); } 
+    //     else { println!("err: {}", resul1_as_str.is_err()); }
+
+    //     assert_eq!(result[..], expected);
+    // }
+
 }

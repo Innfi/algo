@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 consistent_hash = "0.1.4"
-sha-1 = "0.8.1"
+
 hex-literal="0.3.4"
+rust-crypto="0.2.36"
