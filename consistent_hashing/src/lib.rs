@@ -26,7 +26,7 @@ fn access_consistent_hash_with_impl() {
     hash: String::from(""),
   };
 
-  let ring_instance = innfis_hash::TinyHashRing::new(vec![node], 0);
+  let ring_instance = innfis_hash::TinyHashRing::new(&vec![node], 1);
 
   assert_eq!(ring_instance.rings.len(), 1);
 }
@@ -38,24 +38,29 @@ fn input_nodes_get_hashes() {
     hash: String::from(""),
   };
 
-  let ring_instance = innfis_hash::TinyHashRing::new(vec![node], 0);
+  let ring_instance = innfis_hash::TinyHashRing::new(&vec![node], 1);
 
   assert_ne!(ring_instance.rings[0].hash, String::from(""));
 }
 
-// #[test]
-// fn consistent_hash_has_virtual_node_len() {
-//   let node = tiny_hash::TinyNode {
-//     url: String::from("test_url"),
-//     hash: String::from(""),
-//   };
+#[test]
+fn consistent_hash_has_virtual_node_len() {
+  let node = innfis_hash::TinyNode {
+    url: String::from("test_url"),
+    hash: String::from(""),
+  };
 
-//   let virtual_node_len: usize = 5;
-//   let ring_instance = tiny_hash::TinyHash::new(vec![node], virtual_node_len);
+  let virtual_node_len: usize = 5;
+  let ring_instance = innfis_hash::TinyHashRing::new(
+    &vec![node],
+    virtual_node_len
+  );
 
-//   assert_eq!(ring_instance.rings.len(), virtual_node_len);
-// }
-
+  assert_eq!(ring_instance.rings.len(), virtual_node_len);
+  ring_instance.rings.into_iter().for_each(|x| {
+    println!("url: {}, hash: {}", x.url, x.hash);
+  });
+}
 
 
 #[cfg(test)]
