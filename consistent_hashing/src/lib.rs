@@ -1,150 +1,68 @@
 mod innfis_hash;
 
 #[test]
-fn test_instiatiate() {
-    let instance = innfis_hash::ConsistentHash::new(vec![]);
+fn node_has_basic_fields() {
+  let node = innfis_hash::TinyNode {
+      url: String::from("test_url"),
+      hash: String::from(""),
+  };
 
-    assert_eq!(instance.rings.is_empty(), true);
+  assert_eq!(node.url.to_string(), "test_url");
 }
 
 #[test]
-fn test_constructor() {
-    let node1 = innfis_hash::Node {
-        url: String::from("test_url1"),
-    };
-    let node2 = innfis_hash::Node {
-        url: String::from("test_url2"),
-    };
-    let input_vec = vec![node1, node2];
-    let input_len = input_vec.len();
+fn consistent_hash_has_empty_ring() {
+  let ring_instance = innfis_hash::TinyHashRing {
+    rings: vec![]
+  };
 
-    let instance = innfis_hash::ConsistentHash::new(input_vec);
-    assert_eq!(input_len, instance.rings.len());
+  assert_eq!(ring_instance.rings.is_empty(), true);
 }
 
 #[test]
-fn test_add_node() {
-    let input = create_node_input();
+fn access_consistent_hash_with_impl() {
+  let node = innfis_hash::TinyNode {
+    url: String::from("test_url"),
+    hash: String::from(""),
+  };
 
-    let mut instance = innfis_hash::ConsistentHash::new(input);
-    assert_eq!(instance.rings.is_empty(), false);
+  let ring_instance = innfis_hash::TinyHashRing::new(vec![node], 0);
 
-    let new_node = innfis_hash::Node {
-        url: String::from("test8"),
-    };
-
-    let add_result = instance.add_node(new_node);
-    assert_eq!(add_result, Ok(0));
+  assert_eq!(ring_instance.rings.len(), 1);
 }
 
-fn create_node_input() -> Vec<innfis_hash::Node> {
-    let input_vec = vec![
-        innfis_hash::Node {
-            url: String::from("test1"),
-        },
-        innfis_hash::Node {
-            url: String::from("test5"),
-        },
-        innfis_hash::Node {
-            url: String::from("test10"),
-        },
-        innfis_hash::Node {
-            url: String::from("test3"),
-        },
-        innfis_hash::Node {
-            url: String::from("test7"),
-        },
-    ];
+#[test]
+fn input_nodes_get_hashes() {
+  let node = innfis_hash::TinyNode {
+    url: String::from("test_url"),
+    hash: String::from(""),
+  };
 
-    input_vec
+  let ring_instance = innfis_hash::TinyHashRing::new(vec![node], 0);
+
+  assert_ne!(ring_instance.rings[0].hash, String::from(""));
 }
+
+// #[test]
+// fn consistent_hash_has_virtual_node_len() {
+//   let node = tiny_hash::TinyNode {
+//     url: String::from("test_url"),
+//     hash: String::from(""),
+//   };
+
+//   let virtual_node_len: usize = 5;
+//   let ring_instance = tiny_hash::TinyHash::new(vec![node], virtual_node_len);
+
+//   assert_eq!(ring_instance.rings.len(), virtual_node_len);
+// }
+
+
 
 #[cfg(test)]
 mod tests {    
-    use consistent_hash::{Node, StaticHashRing, DefaultHash};
-    //use sha1::{Sha1, Digest};
-    //use hex_literal::hex;
     use crypto::digest::Digest;
     use crypto::sha1::Sha1;
-    use std::str;
-    
-    #[test]
-    fn consistent_hash_from_crate() {
-        let nodes = vec![
-            Node::new("foo").quantity(5),
-            Node::new("bar").quantity(5),
-            Node::new("baz").quantity(5),
-        ];
-
-        let ring = StaticHashRing::new(DefaultHash, nodes.into_iter());
-        assert_eq!(ring.len(), 15);
-        assert_eq!(ring.nodes().len(), 3);
-        assert_eq!(ring.calc_candidates(&"aa").map(|x| &x.key).collect::<Vec<_>>(),
-            [&"bar", &"baz", &"foo"]);
-        assert_eq!(ring.calc_candidates(&"bb").map(|x| &x.key).collect::<Vec<_>>(),
-            [&"foo", &"bar", &"baz"]);    
-    }
-
-    #[test]
-    fn test_traits() {
-        trait Speaks {
-            fn speak(&self);
-            fn noise(&self) -> &str;
-        }
-
-        trait Animal {
-            fn animal_type(&self) -> &str;
-        }
-
-        struct Dog {}
-
-        impl Animal for Dog {
-            fn animal_type(&self) -> &str {
-                "dog"
-            }
-        }
-
-        impl Speaks for Dog {
-            fn speak(&self) {
-                println!("dog::speaks");
-            }
-
-            fn noise(&self) -> &str {
-                "bark"
-            }
-        }
-
-        let a_dog = Dog {};
-        assert_eq!(a_dog.animal_type(), "dog");
-        assert_eq!(a_dog.noise(), "bark");
-    }
-
-    #[test]
-    fn try_apply_trait() {
-        trait NodeType {
-            fn to_type(&self) -> String;
-        }
-
-        struct NodeValue {
-            node_type: String,
-        }
-
-        impl NodeValue {
-            pub fn new() -> Self {
-                Self { node_type: String::from("hashKey"), }
-            }
-        }
-
-        impl NodeType for NodeValue {
-            fn to_type(&self) -> String {
-                self.node_type.clone()
-            }
-        }
-
-        let node_instance = NodeValue::new();
-        assert_eq!(node_instance.to_type(), String::from("hashKey"));
-    }
-
+ 
     #[test]
     fn vec_binary_search() {
         let mut preset = vec![ 5, 4, 7, 1, 10, 99, 51 ];
@@ -163,7 +81,6 @@ mod tests {
 
     #[test]
     fn test_crypto_sha1() {
-        // create a Sha1 object
         let mut hasher = Sha1::new();
 
         hasher.input_str("hello world");
@@ -177,27 +94,4 @@ mod tests {
 
         assert_eq!(result1, "c25325615b8492da77c2280a425a3aa82efda6d3");
     }
-
-    // #[test]
-    // fn test_sha1() {
-    //     let mut hasher = Sha1::new();
-    //     let test_input = b"hello world";
-        
-    //     hasher.update(test_input);
-    //     let result = hasher.finalize();
-    //     let result_spread = &result[..];
-    //     let expected = hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
-
-    //     result_spread.into_iter().for_each(|x| {
-    //         println!("element: {}", x);
-    //     });
-
-    //     let resul1_as_str = str::from_utf8(result_spread);
-
-    //     if resul1_as_str.is_ok() { println!("result ok"); } 
-    //     else { println!("err: {}", resul1_as_str.is_err()); }
-
-    //     assert_eq!(result[..], expected);
-    // }
-
 }
