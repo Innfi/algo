@@ -53,10 +53,7 @@ fn consistent_hash_has_virtual_node_len() {
   let virtual_node_len: usize = 5;
   let expected_node_len: usize = 10;
   
-  let ring_instance = TinyHashRing::new(
-    &initial_nodes,
-    virtual_node_len
-  );
+  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
 
   let view = ring_instance.rings_view();
   assert_eq!(view.len(), expected_node_len);
@@ -76,10 +73,7 @@ fn node_is_sorted_by_hash() {
   ];
   let virtual_node_len: usize = 3;
 
-  let ring_instance = TinyHashRing::new(
-    &initial_nodes,
-    virtual_node_len
-  );
+  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
 
   let mut current_hash: String = String::new();
 
@@ -108,10 +102,7 @@ fn add_node() {
   let virtual_node_len: usize = 3;
   let expected_node_len: usize = 9;
 
-  let mut ring_instance = TinyHashRing::new(
-    &initial_nodes,
-    virtual_node_len
-  );
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
 
   let new_node = TinyNode {
     url: String::from("http://test-server3:9200"),
@@ -120,6 +111,38 @@ fn add_node() {
 
   ring_instance.add_node(&new_node);
 
+  let view = ring_instance.rings_view();
+  assert_eq!(view.len(), expected_node_len);
+}
+
+#[test]
+fn remove_node() {
+  let initial_nodes: Vec<TinyNode> = vec![
+    TinyNode {
+      url: String::from("http://test-server1:9200"),
+      hash: String::from(""),
+    },
+    TinyNode {
+      url: String::from("http://test-server2:9200"),
+      hash: String::from(""),
+    },
+    TinyNode {
+      url: String::from("http://test-server3:9200"),
+      hash: String::from(""),
+    },
+  ];
+  let virtual_node_len: usize = 3;
+
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+
+  let target_node = TinyNode {
+    url: String::from("http://test-server2:9200"),
+    hash: String::from(""),
+  };
+
+  ring_instance.remove_node(&target_node);
+
+  let expected_node_len: usize = 6;
   let view = ring_instance.rings_view();
   assert_eq!(view.len(), expected_node_len);
 }

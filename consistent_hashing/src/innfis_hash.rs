@@ -98,6 +98,20 @@ impl TinyHashRing {
 
   // remove_node
   pub fn remove_node(&mut self, target_node: &TinyNode) {
-    // TODO
+    let mut hasher = Sha1::new();
+
+    for n in 0..self.virtual_node_len {
+      let node_id: String = to_virtual_node_id(target_node, n);
+      hasher.input_str(node_id.as_str());
+      let target_hash: String = hasher.result_str();
+
+      let search_result = self.rings.binary_search_by(|x| {
+        x.hash.cmp(&target_hash)
+      });
+      let index: usize = search_result.unwrap_or_else(|x| x);
+      self.rings.remove(index);
+
+      hasher.reset();
+    }
   }
 }
