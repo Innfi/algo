@@ -114,4 +114,22 @@ impl TinyHashRing {
       hasher.reset();
     }
   }
+
+  // find candidates 
+  pub fn to_candidates(&mut self, key: &String) -> Vec<String> {
+    let mut hasher = Sha1::new();
+
+    hasher.input_str(key.as_str());
+    let target_hash: String = hasher.result_str();
+
+    //FIXME: duplicate search codes
+    let search_result = self.rings.binary_search_by(|x| { 
+      x.hash.cmp(&target_hash)
+    });
+    let index: usize = search_result.unwrap_or_else(|x| x);
+
+    hasher.reset();
+
+    vec![]
+  }
 }
