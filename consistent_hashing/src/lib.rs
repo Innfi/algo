@@ -147,6 +147,33 @@ fn remove_node() {
   assert_eq!(view.len(), expected_node_len);
 }
 
+#[test]
+fn run_to_candidate() {
+  let initial_nodes: Vec<TinyNode> = vec![
+    TinyNode {
+      url: String::from("http://test-server1:9200"),
+      hash: String::from(""),
+    },
+    TinyNode {
+      url: String::from("http://test-server2:9200"),
+      hash: String::from(""),
+    },
+    TinyNode {
+      url: String::from("http://test-server3:9200"),
+      hash: String::from(""),
+    },
+  ];
+  let virtual_node_len: usize = 3;
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+
+  let input = String::from("hello, world");
+
+  let candidates = ring_instance.to_candidates(&input);
+  candidates.into_iter().for_each(|x| {
+    println!("candidate: {}", x);
+  });
+}
+
 #[cfg(test)]
 mod tests {    
     use crypto::digest::Digest;
@@ -182,5 +209,30 @@ mod tests {
         let result1 = hasher.result_str();
 
         assert_eq!(result1, "c25325615b8492da77c2280a425a3aa82efda6d3");
+    }
+
+    fn ring_travel(buffer: &Vec<u32>, index: usize) -> Vec<u32> {
+      let mut output: Vec<u32> = Vec::new();
+
+      for i in index..buffer.len() {
+        output.push(buffer[i]);
+      }
+
+      for i in 0..index {
+        output.push(buffer[i]);
+      }
+
+      output
+    }
+
+    #[test]
+    fn test_ring_buffer() {
+      let buffer = vec![ 2, 4, 1, 3, 5, 10, 9 ];
+      let index = 3;
+
+      let expected_output = vec![3, 5, 10, 9, 2, 4, 1];
+      
+      //ring_travel(&buffer, index);
+      assert_eq!(ring_travel(&buffer, index), expected_output);
     }
 }

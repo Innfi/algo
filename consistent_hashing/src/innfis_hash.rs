@@ -121,6 +121,7 @@ impl TinyHashRing {
 
     hasher.input_str(key.as_str());
     let target_hash: String = hasher.result_str();
+    hasher.reset();
 
     //FIXME: duplicate search codes
     let search_result = self.rings.binary_search_by(|x| { 
@@ -128,8 +129,16 @@ impl TinyHashRing {
     });
     let index: usize = search_result.unwrap_or_else(|x| x);
 
-    hasher.reset();
+    let mut candidates: Vec<String> = Vec::new();
 
-    vec![]
+    for i in index..self.rings.len() {
+      candidates.push(self.rings[i].url.clone());
+    }
+
+    for i in 0..index {
+      candidates.push(self.rings[i].url.clone());
+    }
+
+    candidates
   }
 }
