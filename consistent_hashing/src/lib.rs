@@ -1,6 +1,25 @@
+use crypto::digest::Digest;
+use crypto::sha1::Sha1;
+
 mod innfis_hash;
 use innfis_hash::TinyNode;
 use innfis_hash::TinyHashRing;
+use innfis_hash::HashFunctionTrait;
+
+struct HashFunctionSHA1 { }
+impl HashFunctionTrait for HashFunctionSHA1 {
+  fn to_hash(&self, key: &str) -> String {
+    let mut hasher = Sha1::new();
+
+    hasher.input_str(key);
+    let hash_value = hasher.result_str();
+    hasher.reset();
+
+    hash_value
+  }
+}
+
+//let hash_instance = HashFunctionSHA1 {};
 
 #[test]
 fn node_has_basic_fields() {
@@ -19,7 +38,7 @@ fn access_consistent_hash_with_impl() {
     hash: String::from(""),
   };
 
-  let ring_instance = TinyHashRing::new(&vec![node], 1);
+  let ring_instance = TinyHashRing::new(&vec![node], 1, HashFunctionSHA1{});
 
   let view = ring_instance.rings_view();
   assert_eq!(view.len(), 1);
@@ -32,7 +51,7 @@ fn input_nodes_get_hashes() {
     hash: String::from(""),
   };
 
-  let ring_instance = TinyHashRing::new(&vec![node], 1);
+  let ring_instance = TinyHashRing::new(&vec![node], 1, HashFunctionSHA1{});
 
   let view = ring_instance.rings_view();
   assert_ne!(view[0].hash, String::from(""));
@@ -53,7 +72,7 @@ fn consistent_hash_has_virtual_node_len() {
   let virtual_node_len: usize = 5;
   let expected_node_len: usize = 10;
   
-  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len, HashFunctionSHA1{});
 
   let view = ring_instance.rings_view();
   assert_eq!(view.len(), expected_node_len);
@@ -73,7 +92,7 @@ fn node_is_sorted_by_hash() {
   ];
   let virtual_node_len: usize = 3;
 
-  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+  let ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len, HashFunctionSHA1{});
 
   let mut current_hash: String = String::new();
 
@@ -102,7 +121,7 @@ fn add_node() {
   let virtual_node_len: usize = 3;
   let expected_node_len: usize = 9;
 
-  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len, HashFunctionSHA1{});
 
   let new_node = TinyNode {
     url: String::from("http://test-server3:9200"),
@@ -133,7 +152,7 @@ fn remove_node() {
   ];
   let virtual_node_len: usize = 3;
 
-  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len, HashFunctionSHA1{});
 
   let target_node = TinyNode {
     url: String::from("http://test-server2:9200"),
@@ -148,7 +167,7 @@ fn remove_node() {
 }
 
 #[test]
-fn run_to_candidate() {
+fn to_candidate() {
   let initial_nodes: Vec<TinyNode> = vec![
     TinyNode {
       url: String::from("http://test-server1:9200"),
@@ -164,13 +183,18 @@ fn run_to_candidate() {
     },
   ];
   let virtual_node_len: usize = 3;
-  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len);
+
+  let mut ring_instance = TinyHashRing::new(&initial_nodes, virtual_node_len, HashFunctionSHA1{});
 
   let input = String::from("hello, world");
 
   let candidates = ring_instance.to_candidates(&input);
   candidates.into_iter().for_each(|x| {
     println!("candidate: {}", x);
+  });
+
+  ring_instance.rings_view().into_iter().for_each(|x: &TinyNode| {
+    println!("url: {}, hash: {}", x.url, x.hash);
   });
 }
 
@@ -234,5 +258,28 @@ mod tests {
       
       //ring_travel(&buffer, index);
       assert_eq!(ring_travel(&buffer, index), expected_output);
+    }
+
+    #[test]
+    fn test_generic_traits() {
+      trait HashNodeTrait {
+        fn to_payload(&self) -> String;
+      }
+
+      struct InitialNode {
+        url: String,
+      }
+
+      impl HashNodeTrait for InitialNode {
+        fn to_payload(&self) -> String{
+          self.url.clone()
+        }
+      }
+
+      let instance = InitialNode {
+        url: String::from("Hello"),
+      };
+
+      assert_eq!(instance.to_payload(), String::from("Hello"));
     }
 }

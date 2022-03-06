@@ -6,54 +6,36 @@ pub struct TinyNode {
   pub hash: String,
 }
 
-pub struct TinyHashRing {
+pub trait HashFunctionTrait {
+  fn to_hash(&self, key: &str) -> String;
+}
+
+pub struct TinyHashRing<F> {
   rings: Vec<TinyNode>,
   virtual_node_len: usize,
+  hash_function: F,
 }
 
-fn to_initial_nodes(
-  nodes: &Vec<TinyNode>,
-  virtual_node_len: usize
-) -> Vec<TinyNode> {
-  let mut hasher = Sha1::new();
-
-  let mut initial_nodes: Vec<TinyNode> = vec![];
-
-  nodes.into_iter().for_each(|x| {
-
-    //FIXME
-    for n in 0..virtual_node_len {
-      let node_id: String = to_virtual_node_id(x, n);
-      
-      hasher.input_str(node_id.as_str());
-
-      let virtual_node = TinyNode {
-        url: x.url.clone(),
-        hash: hasher.result_str(),
-      };
-
-      hasher.reset();
-
-      initial_nodes.push(virtual_node);
-    }
-  });
-
-  initial_nodes
-}
-
-fn to_virtual_node_id(node: &TinyNode, index: usize) -> String {
-  if index == 0 { return format!("{}", node.url); }
-
-  format!("{}#{}", node.url, index)
-}
-
-impl TinyHashRing {
+impl<F> TinyHashRing<F> where F: HashFunctionTrait {
   // new
-  pub fn new(nodes: &Vec<TinyNode>, virtual_node_len: usize) -> Self {
-    let mut initial_nodes = to_initial_nodes(nodes, virtual_node_len);
+  pub fn new(
+    nodes: &Vec<TinyNode>,
+    virtual_node_len: usize,
+    hash_function: F
+  ) -> Self {
+    let mut initial_nodes: Vec<TinyNode> = vec![];
+    nodes.into_iter().for_each(|x| {
+      for n in 0..virtual_node_len {
+        let node_id: String = format!("{}#{}", x.url, n);
+        initial_nodes.push(TinyNode {
+          url: x.url.clone(),
+          hash: hash_function.to_hash(&node_id.to_string()),
+        });
+      }
+    });
     initial_nodes.sort_by(|a, b| a.hash.cmp(&b.hash));
 
-    Self { rings: initial_nodes, virtual_node_len }
+    Self { rings: initial_nodes, virtual_node_len, hash_function }
   }
 
   // rings_view
@@ -63,20 +45,14 @@ impl TinyHashRing {
 
   // add_node
   pub fn add_node(&mut self, new_node: &TinyNode) {
-    let mut hasher = Sha1::new();
-
     let mut new_nodes: Vec<TinyNode> = Vec::new();
 
     for n in 0..self.virtual_node_len {
-      let node_id: String = to_virtual_node_id(new_node, n);
-      hasher.input_str(node_id.as_str());
-     
+      let node_id: String = format!("{}#{}", new_node.url, n);
       let virtual_node = TinyNode {
         url: new_node.url.clone(),
-        hash: hasher.result_str(),
+        hash: self.hash_function.to_hash(&node_id),
       };
-
-      hasher.reset();
 
       new_nodes.push(virtual_node);
     }
@@ -98,43 +74,32 @@ impl TinyHashRing {
 
   // remove_node
   pub fn remove_node(&mut self, target_node: &TinyNode) {
-    let mut hasher = Sha1::new();
-
     for n in 0..self.virtual_node_len {
-      let node_id: String = to_virtual_node_id(target_node, n);
-      hasher.input_str(node_id.as_str());
-      let target_hash: String = hasher.result_str();
+      let node_id: String = format!("{}#{}", target_node.url, n);
+      let target_hash: String = self.hash_function.to_hash(&node_id);
 
       let search_result = self.rings.binary_search_by(|x| {
         x.hash.cmp(&target_hash)
       });
       let index: usize = search_result.unwrap_or_else(|x| x);
       self.rings.remove(index);
-
-      hasher.reset();
     }
   }
 
   // find candidates 
   pub fn to_candidates(&mut self, key: &String) -> Vec<String> {
-    let mut hasher = Sha1::new();
+    let target_hash: String = self.hash_function.to_hash(&key.as_str());
 
-    hasher.input_str(key.as_str());
-    let target_hash: String = hasher.result_str();
-    hasher.reset();
-
-    //FIXME: duplicate search codes
     let search_result = self.rings.binary_search_by(|x| { 
       x.hash.cmp(&target_hash)
     });
     let index: usize = search_result.unwrap_or_else(|x| x);
 
     let mut candidates: Vec<String> = Vec::new();
-
+    //FIXME
     for i in index..self.rings.len() {
       candidates.push(self.rings[i].url.clone());
     }
-
     for i in 0..index {
       candidates.push(self.rings[i].url.clone());
     }
