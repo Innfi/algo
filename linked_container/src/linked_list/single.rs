@@ -1,26 +1,44 @@
+// pub struct SingleNode {
+// 	pub name: String,
+// 	pub next: Option<Box<SingleNode>>,
+// }
 
-pub struct SingleNode {
-	name: String,
-}
+// impl SingleNode {
+// 	pub fn new(input: String) -> Self {
+// 		Self {
+// 			name: input,
+// 			next: None,
+// 		}
+// 	}
+// }
 
-impl SingleNode {
-	pub fn new(input: &str) -> Self {
-		Self {
-			name: input.into()
-		}
-	}
+// pub struct SingleLinkedList<'a> {
+// 	root: Option<Box<SingleNode>>,
+// 	current: Option<&'a Box<SingleNode>>,
+// }
 
-	pub fn dummy_function(&self) -> String {
-		self.name.clone()
-	}
-}
+// impl<'a> SingleLinkedList<'a> {
+// 	pub fn new() -> Self {
+// 		Self {
+// 			root: None,
+// 			current: None,
+// 		}
+// 	}
 
-pub struct SingleLinkedList {
-	
-}
+// 	pub fn get_root(&self) -> Option<&Box<SingleNode>> {
+// 		return self.root.as_ref();
+// 	}
 
-impl SingleLinkedList {
-	pub fn get_root(&self) -> SingleNode {
-		SingleNode::new("dummy")
-	}
-}
+// 	pub fn insert(&mut self, input: String) -> Result<(), &'static str> {
+// 		if self.root.is_none() {
+// 			self.root = Some(Box::<SingleNode>::new(
+// 				SingleNode::new(input)
+// 			));
+// 			self.current = self.root;
+
+// 			return Ok(());
+// 		}
+
+// 		Ok(())
+// 	}
+// }
