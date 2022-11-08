@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod tests_option {
   struct TestNode {
     pub data: String,
     pub next: Option<Box<TestNode>>,
@@ -69,34 +69,65 @@ mod tests {
     assert_eq!(leaf_node.next.is_none(), true);
   }
 
-  #[test]
-  fn node_without_option() {
-    // how to remove Option<>?
+}
+
+// https://rust-unofficial.github.io/too-many-lists/first-final.html
+#[cfg(test)]
+mod tests_reference {
+  use std::mem;
+
+  pub struct List {
+    head: Link,
   }
-// 	use linked_container::linked_list::*;
 
-// 	#[test]
-// 	fn test_insert_initial() {
-// 		let mut instance = SingleLinkedList::new();
+  enum Link {
+    Empty,
+    More(Box<Node>),
+  }
 
-// 		let input = String::from("hello");
-// 		let _ = instance.insert(input);
+  struct Node {
+    elem: i32,
+    next: Link,
+  }
 
-// 		let root = instance.get_root().unwrap();
+  impl List {
+    pub fn new() -> Self {
+      List { head: Link::Empty }
+    }
 
-// 		assert_eq!(root.name.as_str(), "hello");
-// 	}
+    pub fn push(&mut self, elem: i32) {
+      let new_node = Box::new(Node {
+        elem: elem,
+        next: mem::replace(&mut self.head, Link::Empty),
+      });
 
-// 	#[test]
-// 	fn test_next_node() {
-// 		let mut instance = SingleLinkedList::new();
+      self.head = Link::More(new_node);
+    }
 
-// 		let _ = instance.insert(String::from("hello"));
-// 		let _ = instance.insert(String::from("world"));
+    pub fn pop(&mut self) -> Option<i32> {
+      match mem::replace(&mut self.head, Link::Empty) {
+        Link::Empty => None,
+        Link::More(node) => {
+          self.head = node.next;
+          Some(node.elem)
+        }
+      }
+    }
+  }
 
-// 		let root = instance.get_root().unwrap();
+  #[test]
+  fn test_empty_list() {
+    let mut list = List::new();
 
-// 		assert_eq!(root.name.as_str(), "hello");
-// 		assert_eq!(root.next.as_ref().unwrap().name.as_str(), "world");
-// 	}
+    assert_eq!(list.pop(), None);
+  }
+
+  #[test]
+  fn test_push_pop() {
+    let mut list = List::new();
+
+    list.push(5);
+    assert_eq!(list.pop().unwrap(), 5);
+    assert_eq!(list.pop(), None);
+  }
 }
