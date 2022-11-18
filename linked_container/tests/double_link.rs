@@ -1,9 +1,10 @@
 #[cfg(test)]
 mod tests_double_link {
-  use std::rc::Rc;
+  use std::{rc::Rc, borrow::BorrowMut};
 
   pub struct List<T> {
-    head: Link<T>
+    head: Link<T>,
+    tail: Link<T>,
   }
 
   type Link<T> = Option<Rc<Node<T>>>;
@@ -16,7 +17,7 @@ mod tests_double_link {
 
   impl<T> List<T> {
     pub fn new() -> Self {
-      List { head: None }
+      List { head: None, tail: None }
     }
 
     pub fn add(&mut self, elem: T) {
@@ -30,20 +31,33 @@ mod tests_double_link {
         return
       }
 
+      let new_tail = Rc::new(Node {
+        elem,
+        prev: self.head.clone(),
+        next: self.head.clone(),
+      });
+
       // TODO: link next and prev between nodes
+      let mut der = self.head.borrow_mut().as_ref().unwrap();
+      der.next = Some(new_tail);
     }
 
     pub fn to_head(&self) -> Option<&T> {
       self.head.as_ref().map(|node| &node.elem)
     }
 
+    pub fn to_tail(&self) -> Option<&T>  {
+      self.tail.as_ref().map(|node| &node.elem)
+    }
+
     pub fn iter(&self) -> Iter<'_, T> {
-      Iter { next: self.head.as_deref() }
+      Iter { next: self.head.as_deref(), prev: None }
     }
   }
 
   pub struct Iter<'a, T> {
     next: Option<&'a Node<T>>,
+    prev: Option<&'a Node<T>>,
   }
 
   impl<'a, T> Iterator for Iter<'a, T> {
@@ -53,6 +67,16 @@ mod tests_double_link {
       self.next.map(|node| {
         self.next = node.next.as_deref();
 
+        &node.elem
+      })
+    }
+  }
+
+  impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+      self.prev.map(|node| {
+        self.prev = node.prev.as_deref();
+  
         &node.elem
       })
     }
@@ -85,5 +109,14 @@ mod tests_double_link {
 
     assert_eq!(iter.next(), Some(&1));
     assert_eq!(iter.next(), Some(&2));
+  }
+
+  #[test]
+  fn test_iterator_rev() {
+    let input = vec![1, 2, 3, 4];
+
+    let mut iter = input.iter().rev();
+
+    assert_eq!(iter.next(), Some(&4));
   }
 }
