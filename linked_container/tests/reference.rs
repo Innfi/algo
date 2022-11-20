@@ -409,8 +409,32 @@ mod tests_reference4 {
       })
     }
 
+    pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
+      self.head.as_ref().map(|node| {
+        RefMut::map(node.borrow_mut(), |node| &mut node.elem)
+      })
+    }
+
+    pub fn peek_back(&self) -> Option<Ref<T>> {
+      self.tail.as_ref().map(|node| {
+        Ref::map(node.borrow(), |node| &node.elem)
+      })
+    }
+
+    pub fn peek_back_mut(&mut self) -> Option<RefMut<T>> {
+      self.tail.as_ref().map(|node| {
+        RefMut::map(node.borrow_mut(), |node| &mut node.elem)
+      })
+    }
+
     pub fn into_iter(self) -> IntoIter<T> {
       IntoIter(self)
+    }
+  }
+
+  impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+      while self.pop_front().is_some() {}
     }
   }
 
