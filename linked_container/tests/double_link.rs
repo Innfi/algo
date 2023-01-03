@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests_double_link {
   use std::{rc::Rc, borrow::BorrowMut};
+  use std::cell::RefMut;
 
   pub struct List<T> {
     head: Link<T>,
@@ -38,8 +39,12 @@ mod tests_double_link {
       });
 
       // TODO: link next and prev between nodes
-      let mut der = self.head.borrow_mut().as_ref().unwrap();
-      der.next = Some(new_tail);
+
+      let b1 = self.head.borrow_mut();
+      let mut test_ref = RefMut::map(b1, |t| &mut t);
+
+      // let mut der = self.head.borrow_mut().as_ref().unwrap();
+      // der.next = Some(new_tail);
     }
 
     pub fn to_head(&self) -> Option<&T> {
