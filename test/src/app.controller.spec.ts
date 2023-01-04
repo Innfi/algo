@@ -70,5 +70,42 @@ describe('AppController', () => {
 
       expect(instance.root.next.next.data).toBe(tailData);
     });
+
+    it('delete node in the middle', () => {
+      const instance = new SingleLink();
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+
+      instance.deleteOne('second');
+
+      expect(instance.root.data).toBe('first');
+      expect(instance.root.next.data).toBe('third');
+    });
+
+    it('delete first node', () => {
+      const instance = new SingleLink();
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+
+      instance.deleteOne('first');
+
+      expect(instance.root.data).toBe('second');
+      expect(instance.root.next.data).toBe('third');
+    });
+
+    it('delete last node', () => {
+      const instance = new SingleLink();
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+      instance.insert('fourth');
+
+      instance.deleteOne('fourth');
+
+      expect(instance.root.next.next.data).toBe('third');
+      expect(instance.root.next.next.next).toBeUndefined();
+    });
   });
 });

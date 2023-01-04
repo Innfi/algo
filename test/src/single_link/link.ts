@@ -32,4 +32,24 @@ export class SingleLink {
     this.tail.next = newNode;
     this.tail = newNode;
   }
+
+  public deleteOne(input: string): void {
+    let prevNode = this.root;
+
+    if (prevNode.data === input) {
+      this.root = prevNode.next;
+      return;
+    }
+
+    while (prevNode.next !== undefined) {
+      if (prevNode.next.data === input) {
+        prevNode.next = prevNode.next.next;
+        return;
+      }
+
+      prevNode = prevNode.next;
+    }
+
+    prevNode = undefined;
+  }
 }
