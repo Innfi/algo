@@ -1,25 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Node, SingleLink } from '../src/single_link/link';
+// import { Test, TestingModule } from '@nestjs/testing';
+
+// import { AppController } from './app.controller';
+// import { AppService } from './app.service';
+import { Node, SingleLink } from './link/single_link';
+import { DoubleNode, DoubleLink } from './link/double_link';
 
 describe('AppController', () => {
-  let appController: AppController;
+  // let appController: AppController;
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
+  // beforeEach(async () => {
+  //   const app: TestingModule = await Test.createTestingModule({
+  //     controllers: [AppController],
+  //     providers: [AppService],
+  //   }).compile();
 
-    appController = app.get<AppController>(AppController);
-  });
+  //   appController = app.get<AppController>(AppController);
+  // });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-
+  describe('single', () => {
     it('create node', () => {
       const data = 'test';
       const node = new Node(data);
@@ -108,4 +106,94 @@ describe('AppController', () => {
       expect(instance.root.next.next.next).toBeUndefined();
     });
   });
+
+  describe('double', () => {
+    it('create node', () => {
+      const data = 'initial';
+      const node = new DoubleNode(data);
+
+      expect(node.data).toBe(data);
+    });
+
+    it('initial node: root has no relation', () => {
+      const instance = new DoubleLink();
+
+      const startData = 'start';
+      instance.insert(startData);
+    });
+
+    it('second node: root and tail is linked', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+
+      expect(instance.root.data).toBe(instance.root.next.prev.data);
+    });
+
+    it('tail node points at the end of the link', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+      expect(instance.tail.data).toBe('second');
+
+      instance.insert('third');
+
+      expect(instance.tail.data).toBe('third');
+    });
+
+    it('can access to tail node through root link', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+
+      const tailData = 'third';
+      instance.insert(tailData);
+
+      expect(instance.root.next.next.data).toBe(tailData);
+    });
+
+    it('delete root node: next node takes place', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+
+      instance.deleteNode('first');
+      
+      expect(instance.root.data).toBe('second');
+      expect(instance.root.prev).toBeUndefined();
+    });
+
+    it('delete node in the middle', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+
+      instance.deleteNode('second');
+
+      expect(instance.root.data).toBe('first');
+      expect(instance.root.next.data).toBe('third');
+      expect(instance.root.next.prev.data).toBe('first');
+    });
+
+    it('delete node in the tail', () => {
+      const instance = new DoubleLink();
+
+      instance.insert('first');
+      instance.insert('second');
+      instance.insert('third');
+
+      instance.deleteNode('third');
+
+      expect(instance.tail.data).toBe('third');
+      expect(instance.tail.prev.data).toBe('second');
+    });
+  });
+
 });
