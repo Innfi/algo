@@ -1,7 +1,7 @@
 
 
-export class Node {
-  public next: Node;
+export class SingleNode {
+  public next: SingleNode;
 
   public data: string;
 
@@ -12,8 +12,8 @@ export class Node {
 }
 
 export class SingleLink {
-  public root: Node;
-  public tail: Node;
+  public root: SingleNode;
+  public tail: SingleNode;
 
   constructor() {
     this.root = undefined;
@@ -22,12 +22,12 @@ export class SingleLink {
 
   public insert(input: string = ''): void {
     if (!this.root) {
-      this.root = new Node(input);
+      this.root = new SingleNode(input);
       this.tail = this.root;
       return;
     }
 
-    const newNode = new Node(input);
+    const newNode = new SingleNode(input);
 
     this.tail.next = newNode;
     this.tail = newNode;
