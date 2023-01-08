@@ -7,8 +7,12 @@ export class TrieNode {
     this.nodeMap = new Map<string, TrieNode>();
   }
 
-  setNode(key: string, newNode: TrieNode) {
+  setNode(key: string, newNode: TrieNode): void {
     this.nodeMap.set(key, newNode);
+  }
+
+  addNode(key: string): void {
+    this.nodeMap.set(key, new TrieNode());
   }
 
   getNode(key: string): TrieNode {
@@ -37,18 +41,16 @@ export class Trie {
     const prefix = data[0];
     const substring = data.substring(1);
 
-    if (!node.nodeMap.has(prefix)) {
-      node.setNode(prefix, new TrieNode());
-    }
+    if (!node.nodeMap.has(prefix)) node.addNode(prefix);
 
     this.spread(substring, node.getNode(prefix));
   }
 
   exists(data: string): boolean {
     try {
-      let currentData = data;
       let currentNode = this.root;
-
+      let currentData = data;
+      
       while (currentData.length > 0) {
         currentNode = currentNode.getNode(currentData[0]);
         currentData = currentData.substring(1);
@@ -59,5 +61,40 @@ export class Trie {
     } catch (err) {
       return false;
     }
+  }
+
+  getRelatives(data: string): string[] {
+    try {
+      const result: string[] = [];
+      const targetNode = this.findStartNode(data);
+
+      this.traverse(data, targetNode, result);
+
+      return result;
+
+    } catch {
+      return [];
+    }
+  }
+
+  private findStartNode(data: string): TrieNode {
+    let targetNode = this.root;
+
+    data.split('').forEach((v) => {
+      targetNode = targetNode.getNode(v);
+    });
+    
+    return targetNode;
+  }
+
+  traverse(prefix: string, node: TrieNode, result: string[]): void {
+    if (node.isEmpty()) {
+      result.push(prefix);
+      return;
+    }
+
+    Array.from(node.nodeMap.keys()).forEach((member: string) => {
+      this.traverse(prefix + member, node.getNode(member), result);
+    });
   }
 }

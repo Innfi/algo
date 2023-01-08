@@ -78,6 +78,31 @@ describe('trie', () => {
   });
 
   it('getRelatives', () => {
+    const instance = new Trie();
 
+    instance.insert('aabb');
+    instance.insert('aacc');
+    instance.insert('bbccde');
+
+    const expectedResult: string[] = [
+      'aabb',
+      'aacc'
+    ];
+
+    const result = instance.getRelatives('aa');
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+
+  it('getRelatives: empty array for stranger data', () => {
+    const instance = new Trie();
+
+    instance.insert('aabb');
+    instance.insert('aacc');
+    instance.insert('bbccde');
+
+    const result = instance.getRelatives('zz');
+
+    expect(result).toStrictEqual([]);
   });
 });
