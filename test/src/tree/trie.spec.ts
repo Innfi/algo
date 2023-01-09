@@ -105,4 +105,16 @@ describe('trie', () => {
 
     expect(result).toStrictEqual([]);
   });
+
+  it('delete string', () => {
+    const instance = new Trie();
+
+    instance.insert('abcd');
+    instance.insert('aber');
+
+    instance.delete('abcd');
+
+    expect(instance.exists('aber')).toBeTruthy();
+    expect(instance.exists('abcd')).toBeFalsy();
+  });
 });

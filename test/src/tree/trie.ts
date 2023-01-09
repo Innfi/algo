@@ -35,7 +35,7 @@ export class Trie {
     this.spread(data, this.root);
   }
 
-  spread(data: string, node: TrieNode): void {
+  private spread(data: string, node: TrieNode): void {
     if (data.length <= 0) return;
 
     const prefix = data[0];
@@ -97,4 +97,38 @@ export class Trie {
       this.traverse(prefix + member, node.getNode(member), result);
     });
   }
+
+  delete(data: string): void {
+    const targetNodes: { prefix: string; node: TrieNode; }[] = [];
+
+    let current = this.root;
+    const first = current.getNode(data[0]);
+    current = current.getNode(data[0]);
+
+    const second = current.getNode(data[1]);
+    current = current.getNode(data[1]);
+
+    const third = current.getNode(data[2]);
+    current = current.getNode(data[2]);
+
+    third.nodeMap.delete(data[3]);
+    second.nodeMap.delete(data[2]);
+  }
 }
+
+/**
+ * data.split('').forEach((prefix) => {
+      const node = currentNode.getNode(prefix);
+      if (node.isEmpty()) return;
+
+      targetNodes.push({ prefix, node });
+
+      currentNode = currentNode.getNode(prefix);
+    });
+
+    targetNodes.reverse().forEach((targetNode) => {
+      const { prefix, node } = targetNode;
+
+      console.log(`prefix: ${prefix}, node: ${node.isEmpty()}`);
+    });
+ */
