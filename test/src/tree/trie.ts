@@ -19,6 +19,14 @@ export class TrieNode {
     return this.nodeMap.get(key);
   }
 
+  deleteNode(key: string): boolean {
+    return this.nodeMap.delete(key);
+  }
+
+  keysLen(): number {
+    return Array.from(this.nodeMap.keys()).length;
+  }
+
   isEmpty(): boolean {
     return this.nodeMap.size <= 0;
   }
@@ -99,36 +107,26 @@ export class Trie {
   }
 
   delete(data: string): void {
-    const targetNodes: { prefix: string; node: TrieNode; }[] = [];
+    const targetNodes: { isBranch: boolean; node: TrieNode; }[] = [];
 
     let current = this.root;
-    const first = current.getNode(data[0]);
-    current = current.getNode(data[0]);
+    data.substring(0, data.length-1).split('').forEach((v) => {
+      const node = current.getNode(v);
+      const isBranch = node.keysLen() > 1;
 
-    const second = current.getNode(data[1]);
-    current = current.getNode(data[1]);
+      targetNodes.push({ isBranch, node });
 
-    const third = current.getNode(data[2]);
-    current = current.getNode(data[2]);
+      current = node;
+    });
 
-    third.nodeMap.delete(data[3]);
-    second.nodeMap.delete(data[2]);
+    const sub = data.substring(1).split('');
+
+    for (let i=targetNodes.length-1;i > 0;i--) {
+      const { isBranch, node } = targetNodes[i];
+
+      node.deleteNode(sub[i]);
+
+      if (isBranch) break;
+    }
   }
 }
-
-/**
- * data.split('').forEach((prefix) => {
-      const node = currentNode.getNode(prefix);
-      if (node.isEmpty()) return;
-
-      targetNodes.push({ prefix, node });
-
-      currentNode = currentNode.getNode(prefix);
-    });
-
-    targetNodes.reverse().forEach((targetNode) => {
-      const { prefix, node } = targetNode;
-
-      console.log(`prefix: ${prefix}, node: ${node.isEmpty()}`);
-    });
- */

@@ -117,4 +117,8 @@ describe('trie', () => {
     expect(instance.exists('aber')).toBeTruthy();
     expect(instance.exists('abcd')).toBeFalsy();
   });
+
+  it('substring last letter', () => {
+    expect('abcde'.substring(0, 4)).toBe('abcd');
+  });
 });
