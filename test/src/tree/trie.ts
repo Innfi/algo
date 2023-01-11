@@ -60,7 +60,9 @@ export class Trie {
       let currentData = data;
       
       while (currentData.length > 0) {
+        //console.log(`currentData: ${currentData[0]}`);
         currentNode = currentNode.getNode(currentData[0]);
+        //if (currentNode) console.log(`node: ${currentNode.isEmpty()}`);
         currentData = currentData.substring(1);
       }
 
@@ -107,6 +109,8 @@ export class Trie {
   }
 
   delete(data: string): void {
+    if (!this.exists(data)) return;
+
     const targetNodes: { isBranch: boolean; node: TrieNode; }[] = [];
 
     let current = this.root;
@@ -121,7 +125,7 @@ export class Trie {
 
     const sub = data.substring(1).split('');
 
-    for (let i=targetNodes.length-1;i > 0;i--) {
+    for (let i=targetNodes.length-1;i >= 0;i--) {
       const { isBranch, node } = targetNodes[i];
 
       node.deleteNode(sub[i]);

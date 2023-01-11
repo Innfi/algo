@@ -118,7 +118,24 @@ describe('trie', () => {
     expect(instance.exists('abcd')).toBeFalsy();
   });
 
-  it('substring last letter', () => {
-    expect('abcde'.substring(0, 4)).toBe('abcd');
+  it('delete string: remove subset changes nothing', () => {
+    const instance = new Trie();
+
+    instance.insert('abcd');
+
+    instance.delete('bc');
+
+    expect(instance.exists('abcd')).toBeTruthy();
+  });
+
+  it('delete string: simple insert - simple delete', () => {
+    const instance = new Trie();
+
+    instance.insert('1234');
+
+    instance.delete('1234');
+
+    expect(instance.exists('1234')).toBeFalsy();
+    expect(instance.exists('123')).toBeFalsy();
   });
 });
