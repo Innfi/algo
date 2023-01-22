@@ -45,7 +45,7 @@ export class DoubleLink {
 
     let targetNode = this.root;
     
-    while(targetNode !== undefined) {
+    while(targetNode) {
       if (targetNode.data !== data) {
         targetNode = targetNode.next;
         continue;
