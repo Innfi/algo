@@ -1,16 +1,19 @@
 import { DoubleLink, DoubleNode } from "../link/double_link";
 
 export class LRUCache extends DoubleLink {
+	private len: number;
 	readonly limit: number;
 
 	constructor(limit: number = 10) {
 		super();
 		this.limit = limit;
+		this.len = 0;
 	}
 
 	insert(data: string): void {
 		if (!this.root) {
 			super.insert(data);
+			this.len += 1;
 			return;
 		}
 
@@ -20,20 +23,15 @@ export class LRUCache extends DoubleLink {
 		this.root.next = temp;
 		temp.prev = this.root;
 
+		this.len += 1;
+
 		if (this.nodeLen() > this.limit) this.deleteTail();
 	}
 
 	private deleteTail(): void {
-		let current = this.root;
-
-		while(current) {
-			if (!current.next) break;
-
-			current = current.next;
-		}
-
-	  if (current.prev) current.prev.next = undefined;
-		current = undefined;
+		this.tail.prev.next = undefined;
+		this.tail = this.tail.prev;
+		this.len -= 1;
 	}
 
 	get(data: string): string {
@@ -66,14 +64,6 @@ export class LRUCache extends DoubleLink {
 	}
 
 	nodeLen(): number {
-		let current = this.root;
-		let len = 0;
-
-		while(current) {
-			len += 1;
-			current = current.next;
-		}
-
-		return len;
+		return this.len;
 	}
 }
