@@ -2,6 +2,13 @@ package main
 
 import "fmt"
 
+type Color int
+
+const (
+	RED   Color = iota
+	BLACK Color = iota
+)
+
 type Node struct {
 	nodeValue int
 	next      *Node
@@ -9,27 +16,46 @@ type Node struct {
 
 type DoubleNode struct {
 	nodeValue int
-	prev      *DoubleNode
-	next      *DoubleNode
+	left      *DoubleNode
+	right     *DoubleNode
+	parent    *DoubleNode
+	color     Color
 }
 
 type RBTree struct {
 	root *DoubleNode
 }
 
-func (tree *RBTree) insert(nodeValue int) {
-	fmt.Printf("RBTree.insert] \n")
-
-	if tree.root == nil {
-		fmt.Printf("RBTree.insert] empty root \n")
-
-		tree.root = &DoubleNode{
-			nodeValue: nodeValue,
-			prev:      nil,
-			next:      nil,
-		}
+func newDoubleNode(nodeValue int, color Color) *DoubleNode {
+	return &DoubleNode{
+		nodeValue: nodeValue,
+		left:      nil,
+		right:     nil,
+		parent:    nil,
+		color:     color,
 	}
-	fmt.Printf("RBTree.insert] root.nodeValue: %d\n", tree.root.nodeValue)
+}
+
+func (tree *RBTree) insert(nodeValue int) {
+	if tree.root == nil {
+		tree.root = newDoubleNode(nodeValue, BLACK)
+		return
+	}
+
+	if tree.root.nodeValue > nodeValue {
+		tree.root.left = newDoubleNode(nodeValue, RED)
+		tree.root.left.parent = tree.root
+
+		return
+	}
+
+	if tree.root.nodeValue < nodeValue {
+		tree.root.right = newDoubleNode(nodeValue, RED)
+		tree.root.right.parent = tree.root
+
+		return
+	}
+
 }
 
 func main() {
