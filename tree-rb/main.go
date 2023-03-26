@@ -26,7 +26,7 @@ type RBTree struct {
 	root *DoubleNode
 }
 
-func newDoubleNode(nodeValue int, color Color) *DoubleNode {
+func NewDoubleNode(nodeValue int, color Color) *DoubleNode {
 	return &DoubleNode{
 		nodeValue: nodeValue,
 		left:      nil,
@@ -36,26 +36,50 @@ func newDoubleNode(nodeValue int, color Color) *DoubleNode {
 	}
 }
 
-func (tree *RBTree) insert(nodeValue int) {
+func (tree *RBTree) Insert(nodeValue int) {
 	if tree.root == nil {
-		tree.root = newDoubleNode(nodeValue, BLACK)
+		tree.root = NewDoubleNode(nodeValue, BLACK)
 		return
 	}
 
-	if tree.root.nodeValue > nodeValue {
-		tree.root.left = newDoubleNode(nodeValue, RED)
-		tree.root.left.parent = tree.root
+	newNode := tree.insertBinary(tree.root, nodeValue)
+	tree.tryRecolor(newNode)
+}
 
+func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
+	if node.nodeValue > newValue {
+		if node.left == nil {
+			node.left = NewDoubleNode(newValue, RED)
+			node.left.parent = node
+			return node.left
+		}
+
+		return tree.insertBinary(node.left, newValue)
+	}
+
+	if node.right == nil {
+		node.right = NewDoubleNode(newValue, RED)
+		node.right.parent = node
+		return node.right
+	}
+
+	return tree.insertBinary(node.right, newValue)
+}
+
+// to be renamed as tryRebalance
+func (tree *RBTree) tryRecolor(node *DoubleNode) {
+	fmt.Printf("node: %d\n", node.nodeValue)
+	if node.parent == nil {
 		return
 	}
 
-	if tree.root.nodeValue < nodeValue {
-		tree.root.right = newDoubleNode(nodeValue, RED)
-		tree.root.right.parent = tree.root
-
+	if node.color != RED || node.parent.color != RED {
 		return
 	}
 
+	grandParent := node.parent.parent
+	grandParent.left.color = BLACK
+	grandParent.right.color = BLACK
 }
 
 func main() {
