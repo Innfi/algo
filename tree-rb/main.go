@@ -36,6 +36,18 @@ func NewDoubleNode(nodeValue int, color Color) *DoubleNode {
 	}
 }
 
+func IsDoubleRed(node *DoubleNode) bool {
+	if node.color != RED {
+		return false
+	}
+
+	if node.parent.color != RED {
+		return false
+	}
+
+	return true
+}
+
 func (tree *RBTree) Insert(nodeValue int) {
 	if tree.root == nil {
 		tree.root = NewDoubleNode(nodeValue, BLACK)
@@ -43,7 +55,7 @@ func (tree *RBTree) Insert(nodeValue int) {
 	}
 
 	newNode := tree.insertBinary(tree.root, nodeValue)
-	tree.tryRecolor(newNode)
+	tree.tryRebalance(newNode)
 }
 
 func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
@@ -66,17 +78,59 @@ func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
 	return tree.insertBinary(node.right, newValue)
 }
 
-// to be renamed as tryRebalance
-func (tree *RBTree) tryRecolor(node *DoubleNode) {
-	fmt.Printf("node: %d\n", node.nodeValue)
-	if node.parent == nil {
+func (tree *RBTree) tryRebalance(node *DoubleNode) {
+	if !IsDoubleRed(node) {
 		return
 	}
 
-	if node.color != RED || node.parent.color != RED {
+	grandParent := node.parent.parent
+	if grandParent.left == nil {
+		tree.rotateLeft(node)
 		return
 	}
 
+	if grandParent.right == nil {
+		tree.rotateRight(node)
+		return
+	}
+
+	tree.recolor(node)
+	return
+}
+
+func (tree *RBTree) rotateLeft(node *DoubleNode) {
+	grandParent := node.parent.parent
+
+	newParent := node.parent
+	newParent.parent = grandParent.parent
+
+	newParent.left = grandParent
+	grandParent.parent = newParent
+	grandParent.color = RED
+
+	if newParent.parent == nil {
+		tree.root = newParent
+		tree.root.color = BLACK
+	}
+}
+
+func (tree *RBTree) rotateRight(node *DoubleNode) {
+	grandParent := node.parent.parent
+
+	newParent := node.parent
+	newParent.parent = grandParent.parent
+
+	newParent.right = grandParent
+	grandParent.parent = newParent
+	grandParent.color = RED
+
+	if newParent.parent == nil {
+		tree.root = newParent
+		tree.root.color = BLACK
+	}
+}
+
+func (tree *RBTree) recolor(node *DoubleNode) {
 	grandParent := node.parent.parent
 	grandParent.left.color = BLACK
 	grandParent.right.color = BLACK

@@ -17,15 +17,32 @@ import (
 
 TOOD
 --------------------------------------------------------------------------------
+- constraint checker
 - insert nodes
+  - intermediate case 1: 1 2 3 4 5
 - remove node(s)
 
 DONE
 --------------------------------------------------------------------------------
 - create node and link
 - create tree
-- insert initial node
+- insert nodes
+  - insert initial node
+  - simple recoloring: 2 1 3 4
+  - simple left rotation: 1 2 3
+  - simple right rotaion: 3 2 1
+- utility function for instance creation
 */
+
+func CreatePreset(input []int) RBTree {
+	tree := RBTree{}
+
+	for _, elem := range input {
+		tree.Insert(elem)
+	}
+
+	return tree
+}
 
 func TestLink(t *testing.T) {
 	rootNode := DoubleNode{
@@ -68,7 +85,7 @@ func TestStateChange(t *testing.T) {
 }
 
 func TestInsertFirst(t *testing.T) {
-	tree := RBTree{}
+	tree := CreatePreset([]int{1})
 
 	tree.Insert(1)
 
@@ -77,7 +94,7 @@ func TestInsertFirst(t *testing.T) {
 }
 
 func TestValueInsertedAsBinaryTree(t *testing.T) {
-	tree := RBTree{}
+	tree := CreatePreset([]int{5, 1, 7})
 
 	tree.Insert(5)
 	tree.Insert(1)
@@ -89,35 +106,21 @@ func TestValueInsertedAsBinaryTree(t *testing.T) {
 }
 
 func TestInsertFirstReds(t *testing.T) {
-	tree := RBTree{}
-
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(7)
+	tree := CreatePreset([]int{5, 1, 7})
 
 	assert.Equal(t, tree.root.left.color, RED)
 	assert.Equal(t, tree.root.right.color, RED)
 }
 
 func TestLinkParent(t *testing.T) {
-	tree := RBTree{}
-
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(7)
+	tree := CreatePreset([]int{5, 1, 7})
 
 	assert.Equal(t, tree.root.left.parent.nodeValue, tree.root.nodeValue)
 	assert.Equal(t, tree.root.right.parent.nodeValue, tree.root.nodeValue)
 }
 
 func TestInsertNodeAsBinaryTree(t *testing.T) {
-	tree := RBTree{}
-
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(10)
-	tree.Insert(7)
-	tree.Insert(3)
+	tree := CreatePreset([]int{5, 1, 10, 7, 3})
 
 	firstLeaf := tree.root.left.right
 	secondLeaf := tree.root.right.left
@@ -127,12 +130,7 @@ func TestInsertNodeAsBinaryTree(t *testing.T) {
 }
 
 func TestSimpleRecolor(t *testing.T) {
-	tree := RBTree{}
-
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(10)
-	tree.Insert(7)
+	tree := CreatePreset([]int{5, 1, 10, 7})
 
 	root := tree.root
 	firstLeft := root.left
@@ -144,4 +142,40 @@ func TestSimpleRecolor(t *testing.T) {
 
 	assert.Equal(t, firstRight.left.nodeValue, 7)
 	assert.Equal(t, firstRight.left.color, RED)
+}
+
+func TestSimpleLeftRotation(t *testing.T) {
+	tree := CreatePreset([]int{1, 2, 3})
+
+	root := tree.root
+	left := tree.root.left
+	right := tree.root.right
+
+	assert.Equal(t, root.nodeValue, 2)
+	assert.Equal(t, left.nodeValue, 1)
+	assert.Equal(t, right.nodeValue, 3)
+}
+
+func TestSimpleRightRotaion(t *testing.T) {
+	tree := CreatePreset([]int{3, 2, 1})
+
+	root := tree.root
+	left := tree.root.left
+	right := tree.root.right
+
+	assert.Equal(t, root.nodeValue, 2)
+	assert.Equal(t, left.nodeValue, 1)
+	assert.Equal(t, right.nodeValue, 3)
+}
+
+func TestColorAfterRotation(t *testing.T) {
+	tree := CreatePreset([]int{1, 2, 3})
+
+	root := tree.root
+	left := tree.root.left
+	right := tree.root.right
+
+	assert.Equal(t, root.color, BLACK)
+	assert.Equal(t, left.color, RED)
+	assert.Equal(t, right.color, RED)
 }
