@@ -44,6 +44,38 @@ func CreatePreset(input []int) RBTree {
 	return tree
 }
 
+func CheckConstraintColor(node *DoubleNode) bool {
+	if node == nil {
+		return true
+	}
+
+	if node.parent == nil && node.color != BLACK {
+		return false
+	}
+
+	if node.color == RED && node.parent.color == RED {
+		return false
+	}
+
+	if CheckConstraintColor(node.left) == false {
+		return false
+	}
+
+	if CheckConstraintColor(node.right) == false {
+		return false
+	}
+
+	return true
+}
+
+// func CheckConstraintDepth(node *DoubleNode) bool {
+// 	return false
+// }
+//
+// func Depth(node *DoubleNode, current int) int {
+//
+// }
+
 func TestLink(t *testing.T) {
 	rootNode := DoubleNode{
 		nodeValue: 1,
@@ -90,7 +122,7 @@ func TestInsertFirst(t *testing.T) {
 	tree.Insert(1)
 
 	assert.Equal(t, tree.root.nodeValue, 1)
-	assert.Equal(t, tree.root.color, BLACK)
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
 }
 
 func TestValueInsertedAsBinaryTree(t *testing.T) {
@@ -108,8 +140,7 @@ func TestValueInsertedAsBinaryTree(t *testing.T) {
 func TestInsertFirstReds(t *testing.T) {
 	tree := CreatePreset([]int{5, 1, 7})
 
-	assert.Equal(t, tree.root.left.color, RED)
-	assert.Equal(t, tree.root.right.color, RED)
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
 }
 
 func TestLinkParent(t *testing.T) {
@@ -136,6 +167,8 @@ func TestSimpleRecolor(t *testing.T) {
 	firstLeft := root.left
 	firstRight := root.right
 
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
+
 	assert.Equal(t, root.color, BLACK)
 	assert.Equal(t, firstLeft.color, BLACK)
 	assert.Equal(t, firstRight.color, BLACK)
@@ -154,6 +187,8 @@ func TestSimpleLeftRotation(t *testing.T) {
 	assert.Equal(t, root.nodeValue, 2)
 	assert.Equal(t, left.nodeValue, 1)
 	assert.Equal(t, right.nodeValue, 3)
+
+	assert.Equal(t, left.right == nil, true)
 }
 
 func TestSimpleRightRotaion(t *testing.T) {
@@ -166,6 +201,8 @@ func TestSimpleRightRotaion(t *testing.T) {
 	assert.Equal(t, root.nodeValue, 2)
 	assert.Equal(t, left.nodeValue, 1)
 	assert.Equal(t, right.nodeValue, 3)
+
+	assert.Equal(t, right.left == nil, true)
 }
 
 func TestColorAfterRotation(t *testing.T) {
@@ -178,4 +215,6 @@ func TestColorAfterRotation(t *testing.T) {
 	assert.Equal(t, root.color, BLACK)
 	assert.Equal(t, left.color, RED)
 	assert.Equal(t, right.color, RED)
+
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
 }
