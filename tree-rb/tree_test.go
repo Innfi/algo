@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,9 +73,36 @@ func CheckConstraintColor(node *DoubleNode) bool {
 // 	return false
 // }
 //
-// func Depth(node *DoubleNode, current int) int {
-//
-// }
+
+func Depth(node *DoubleNode, depths *[]int) {
+	if node == nil {
+		return
+	}
+
+	if node.left != nil {
+		Depth(node.left, depths)
+	}
+
+	if node.right != nil {
+		Depth(node.right, depths)
+	}
+
+	if node.parent == nil {
+		return
+	}
+
+	current := node
+	depth := 0
+	for current != nil {
+		if current.color == BLACK {
+			depth += 1
+		}
+
+		current = current.parent
+	}
+
+	*depths = append(*depths, depth)
+}
 
 func TestLink(t *testing.T) {
 	rootNode := DoubleNode{
@@ -217,4 +245,17 @@ func TestColorAfterRotation(t *testing.T) {
 	assert.Equal(t, right.color, RED)
 
 	assert.Equal(t, CheckConstraintColor(tree.root), true)
+}
+
+func TestDepthChecker(t *testing.T) {
+	tree := CreatePreset([]int{2, 1, 3})
+
+	depths := []int{}
+	Depth(tree.root, &depths)
+
+	assert.Equal(t, tree.root.right.nodeValue, 3)
+
+	for _, elem := range depths {
+		fmt.Printf("depth: %d\n", elem)
+	}
 }
