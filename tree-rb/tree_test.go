@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +17,6 @@ import (
 
 TOOD
 --------------------------------------------------------------------------------
-- constraint checker
 - insert nodes
   - intermediate case 1: 1 2 3 4 5
 - remove node(s)
@@ -33,6 +31,7 @@ DONE
   - simple left rotation: 1 2 3
   - simple right rotaion: 3 2 1
 - utility function for instance creation
+- constraint checker
 */
 
 func CreatePreset(input []int) RBTree {
@@ -69,10 +68,24 @@ func CheckConstraintColor(node *DoubleNode) bool {
 	return true
 }
 
-// func CheckConstraintDepth(node *DoubleNode) bool {
-// 	return false
-// }
-//
+func CheckConstraintDepth(node *DoubleNode) bool {
+	depths := []int{}
+
+	Depth(node, &depths)
+
+	if len(depths) <= 0 {
+		return false
+	}
+
+	current := depths[0]
+	for _, elem := range depths {
+		if current != elem {
+			return false
+		}
+	}
+
+	return true
+}
 
 func Depth(node *DoubleNode, depths *[]int) {
 	if node == nil {
@@ -254,8 +267,27 @@ func TestDepthChecker(t *testing.T) {
 	Depth(tree.root, &depths)
 
 	assert.Equal(t, tree.root.right.nodeValue, 3)
+}
 
-	for _, elem := range depths {
-		fmt.Printf("depth: %d\n", elem)
-	}
+func TestDepthCheckerValidCase(t *testing.T) {
+	tree := CreatePreset(([]int{10, 5, 15, 1, 7, 13, 17}))
+
+	assert.Equal(t, CheckConstraintDepth(tree.root), true)
+}
+
+func TestDepthCheckerInvalidCase(t *testing.T) {
+	root := NewDoubleNode(10, BLACK)
+	root.left = NewDoubleNode(5, RED)
+	root.left.parent = root
+
+	root.left.left = NewDoubleNode(3, BLACK)
+	root.left.left.parent = root.left
+
+	root.left.right = NewDoubleNode(7, BLACK)
+	root.left.right.parent = root.left
+
+	root.left.left.left = NewDoubleNode(1, RED)
+	root.left.left.left.parent = root.left.left
+
+	assert.Equal(t, CheckConstraintDepth(root), false)
 }
