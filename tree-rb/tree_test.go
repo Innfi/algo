@@ -18,7 +18,8 @@ import (
 TOOD
 --------------------------------------------------------------------------------
 - insert nodes
-  - intermediate case 1: 1 2 3 4 5
+  - intermediate case 1: 10 5 20 30 25
+  - intermediate case 2: 1 2 3 4 5
 - remove node(s)
 
 DONE
@@ -33,89 +34,6 @@ DONE
 - utility function for instance creation
 - constraint checker
 */
-
-func CreatePreset(input []int) RBTree {
-	tree := RBTree{}
-
-	for _, elem := range input {
-		tree.Insert(elem)
-	}
-
-	return tree
-}
-
-func CheckConstraintColor(node *DoubleNode) bool {
-	if node == nil {
-		return true
-	}
-
-	if node.parent == nil && node.color != BLACK {
-		return false
-	}
-
-	if node.color == RED && node.parent.color == RED {
-		return false
-	}
-
-	if CheckConstraintColor(node.left) == false {
-		return false
-	}
-
-	if CheckConstraintColor(node.right) == false {
-		return false
-	}
-
-	return true
-}
-
-func CheckConstraintDepth(node *DoubleNode) bool {
-	depths := []int{}
-
-	Depth(node, &depths)
-
-	if len(depths) <= 0 {
-		return false
-	}
-
-	current := depths[0]
-	for _, elem := range depths {
-		if current != elem {
-			return false
-		}
-	}
-
-	return true
-}
-
-func Depth(node *DoubleNode, depths *[]int) {
-	if node == nil {
-		return
-	}
-
-	if node.left != nil {
-		Depth(node.left, depths)
-	}
-
-	if node.right != nil {
-		Depth(node.right, depths)
-	}
-
-	if node.parent == nil {
-		return
-	}
-
-	current := node
-	depth := 0
-	for current != nil {
-		if current.color == BLACK {
-			depth += 1
-		}
-
-		current = current.parent
-	}
-
-	*depths = append(*depths, depth)
-}
 
 func TestLink(t *testing.T) {
 	rootNode := DoubleNode{
@@ -290,4 +208,11 @@ func TestDepthCheckerInvalidCase(t *testing.T) {
 	root.left.left.left.parent = root.left.left
 
 	assert.Equal(t, CheckConstraintDepth(root), false)
+}
+
+func TestSimpleRestructure(t *testing.T) {
+	// tree := CreatePreset([]int{10, 5, 20, 30, 25})
+	tree := CreatePreset([]int{10, 5, 20, 1, 25})
+
+	PrintTreeBFS(tree.root)
 }
