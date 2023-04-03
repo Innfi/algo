@@ -18,7 +18,6 @@ import (
 TOOD
 --------------------------------------------------------------------------------
 - insert nodes
-  - intermediate case 1: 10 5 20 30 25
   - intermediate case 2: 1 2 3 4 5
 - remove node(s)
 
@@ -31,6 +30,7 @@ DONE
   - simple recoloring: 2 1 3 4
   - simple left rotation: 1 2 3
   - simple right rotaion: 3 2 1
+  - intermediate case 1: 10 5 20 30 25
 - utility function for instance creation
 - constraint checker
 */
@@ -211,8 +211,13 @@ func TestDepthCheckerInvalidCase(t *testing.T) {
 }
 
 func TestSimpleRestructure(t *testing.T) {
-	// tree := CreatePreset([]int{10, 5, 20, 30, 25})
-	tree := CreatePreset([]int{10, 5, 20, 1, 25})
+	tree := CreatePreset([]int{10, 5, 20, 30, 25})
 
-	PrintTreeBFS(tree.root)
+	rightNode := tree.root.right
+	assert.Equal(t, rightNode.nodeValue, 25)
+
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
+	assert.Equal(t, CheckConstraintDepth(tree.root), true)
+
+	// PrintTreeBFS(tree.root)
 }

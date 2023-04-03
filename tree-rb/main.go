@@ -85,6 +85,12 @@ func (tree *RBTree) tryRebalance(node *DoubleNode) {
 
 	grandParent := node.parent.parent
 	if grandParent.left == nil {
+		if grandParent.right.right == nil && grandParent.right.left != nil {
+			tree.rotateRightSingle(node)
+			tree.rotateLeft(node.right)
+			return
+		}
+
 		tree.rotateLeft(node)
 		return
 	}
@@ -101,17 +107,40 @@ func (tree *RBTree) tryRebalance(node *DoubleNode) {
 func (tree *RBTree) rotateLeft(node *DoubleNode) {
 	newLeft := node.parent.parent
 
+	isRightChild := true
+	highierParent := newLeft.parent
+
+	if highierParent != nil {
+		if highierParent.right.nodeValue == newLeft.nodeValue {
+			isRightChild = true
+		} else {
+			isRightChild = false
+		}
+	}
+
 	newParent := node.parent
 	newParent.left = newLeft
 	newParent.parent = newLeft.parent
 
 	newLeft.right = nil
 	newLeft.parent = newParent
-	newLeft.color = RED
 
-	if newParent.parent == nil {
+	newParent.color = BLACK
+	newParent.left.color = RED
+	newParent.right.color = RED
+
+	if highierParent == nil {
 		tree.root = newParent
 		tree.root.color = BLACK
+		return
+	}
+
+	if isRightChild {
+		highierParent.right = newParent
+		newParent.parent = highierParent
+	} else {
+		highierParent.left = newParent
+		newParent.parent = highierParent
 	}
 }
 
@@ -130,6 +159,23 @@ func (tree *RBTree) rotateRight(node *DoubleNode) {
 		tree.root = newParent
 		tree.root.color = BLACK
 	}
+}
+
+func (tree *RBTree) rotateRightSingle(node *DoubleNode) {
+	grandParent := node.parent.parent
+	newParent := node
+	newChild := node.parent
+
+	grandParent.right = nil
+	newParent.parent = nil
+	newChild.parent = nil
+	newChild.left = nil
+
+	grandParent.right = newParent
+	newParent.parent = grandParent
+
+	newParent.right = newChild
+	newChild.parent = newParent
 }
 
 func (tree *RBTree) recolor(node *DoubleNode) {
