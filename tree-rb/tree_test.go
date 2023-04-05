@@ -18,7 +18,7 @@ import (
 TOOD
 --------------------------------------------------------------------------------
 - insert nodes
-  - intermediate case 2: 1 2 3 4 5
+  - medium case: 1 2 3 4 5 6 7 8
 - remove node(s)
 
 DONE
@@ -210,11 +210,22 @@ func TestDepthCheckerInvalidCase(t *testing.T) {
 	assert.Equal(t, CheckConstraintDepth(root), false)
 }
 
-func TestSimpleRestructure(t *testing.T) {
+func TestSimpleRestructureRight(t *testing.T) {
 	tree := CreatePreset([]int{10, 5, 20, 30, 25})
 
 	rightNode := tree.root.right
 	assert.Equal(t, rightNode.nodeValue, 25)
+
+	assert.Equal(t, CheckConstraintColor(tree.root), true)
+	assert.Equal(t, CheckConstraintDepth(tree.root), true)
+
+}
+
+func TestSimpleRestructureLeft(t *testing.T) {
+	tree := CreatePreset([]int{10, 5, 20, 1, 3})
+
+	leftNode := tree.root.left
+	assert.Equal(t, leftNode.nodeValue, 3)
 
 	assert.Equal(t, CheckConstraintColor(tree.root), true)
 	assert.Equal(t, CheckConstraintDepth(tree.root), true)
