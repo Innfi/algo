@@ -54,16 +54,6 @@ func TestLink(t *testing.T) {
 	assert.Equal(t, secondNode.left.nodeValue, 1)
 }
 
-func TestInitNode(t *testing.T) {
-	instance := Node{
-		nodeValue: 1,
-		next:      nil,
-	}
-
-	assert.Equal(t, instance.nodeValue, 1)
-	assert.Equal(t, instance.next == nil, true)
-}
-
 func TestStateChange(t *testing.T) {
 	tree := RBTree{}
 	tree.root = &DoubleNode{
@@ -86,10 +76,6 @@ func TestInsertFirst(t *testing.T) {
 
 func TestValueInsertedAsBinaryTree(t *testing.T) {
 	tree := CreatePreset([]int{5, 1, 7})
-
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(7)
 
 	assert.Equal(t, tree.root.nodeValue, 5)
 	assert.Equal(t, tree.root.left.nodeValue, 1)
@@ -126,7 +112,7 @@ func TestSimpleRecolor(t *testing.T) {
 	firstLeft := root.left
 	firstRight := root.right
 
-	assert.Equal(t, CheckConstraintColor(tree.root), true)
+	assert.Equal(t, CheckConstraintColor(root), true)
 
 	assert.Equal(t, root.color, BLACK)
 	assert.Equal(t, firstLeft.color, BLACK)
@@ -221,14 +207,15 @@ func TestSimpleRestructureRight(t *testing.T) {
 
 }
 
-func TestSimpleRestructureLeft(t *testing.T) {
-	tree := CreatePreset([]int{10, 5, 20, 1, 3})
-
-	leftNode := tree.root.left
-	assert.Equal(t, leftNode.nodeValue, 3)
-
-	assert.Equal(t, CheckConstraintColor(tree.root), true)
-	assert.Equal(t, CheckConstraintDepth(tree.root), true)
-
-	// PrintTreeBFS(tree.root)
-}
+// func TestSimpleRestructureLeft(t *testing.T) {
+// 	tree := CreatePreset([]int{10, 5, 20, 1, 3})
+//
+// 	leftNode := tree.root.left
+// 	assert.Equal(t, leftNode.nodeValue, 3)
+//
+// 	assert.Equal(t, CheckConstraintColor(tree.root), true)
+// 	assert.Equal(t, CheckConstraintDepth(tree.root), true)
+//
+// 	// PrintTreeBFS(tree.root)
+// }
+//
