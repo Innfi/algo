@@ -72,6 +72,10 @@ func Depth(node *DoubleNode, depths *[]int) {
 		return
 	}
 
+	if node.left != nil || node.right != nil {
+		return
+	}
+
 	current := node
 	depth := 0
 	for current != nil {
@@ -89,7 +93,7 @@ func PrintTreeBFS(node *DoubleNode) {
 	if node == nil {
 		return
 	}
-
+	fmt.Printf("----------------------\n")
 	traverseTarget := []*DoubleNode{}
 	nodesByBFS := []*DoubleNode{}
 

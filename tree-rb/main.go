@@ -105,6 +105,7 @@ func (tree *RBTree) rebalanceRB(node *DoubleNode) {
 	}
 
 	for node.parent != nil && node.GrandParent() != nil && node.parent.color == RED {
+		fmt.Printf("node: %d, root: %d\n", node.nodeValue, tree.root.nodeValue)
 		if !IsLeftChild(node.parent) {
 			po := node.ParentOpposite()
 
@@ -123,6 +124,8 @@ func (tree *RBTree) rebalanceRB(node *DoubleNode) {
 				node.GrandParent().color = RED
 
 				tree.rotateLeft(node)
+				fmt.Printf("--- left] node:%d, parent: %d\n", node.nodeValue, node.parent.nodeValue)
+				node = node.parent
 			}
 		} else {
 			po := node.ParentOpposite()
@@ -142,10 +145,12 @@ func (tree *RBTree) rebalanceRB(node *DoubleNode) {
 				node.GrandParent().color = RED
 
 				tree.rotateRight(node)
+				node = node.parent
 			}
 		}
 	}
 
+	fmt.Printf("after] node: %d, root: %d\n", node.nodeValue, tree.root.nodeValue)
 	tree.root.color = BLACK
 }
 
