@@ -116,4 +116,5 @@ func PrintTreeBFS(node *DoubleNode) {
 	for _, elem := range nodesByBFS {
 		fmt.Printf("value: %d, color: %d \n", elem.nodeValue, elem.color)
 	}
+	fmt.Printf("----------------------\n")
 }
