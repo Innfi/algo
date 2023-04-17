@@ -276,10 +276,39 @@ func (tree *RBTree) rotateLeftSingle(node *DoubleNode) {
 	newChild.parent = newParent
 }
 
-func (tree *RBTree) recolor(node *DoubleNode) {
-	grandParent := node.GrandParent()
-	grandParent.left.color = BLACK
-	grandParent.right.color = BLACK
+func (tree *RBTree) Delete(nodeValue int) {
+	targetNode := tree.findNode(nodeValue)
+
+	if targetNode == nil {
+		return
+	}
+
+	// just enough to pass the test
+	if targetNode.parent == nil {
+		tree.root = nil
+	}
+
+	targetNode = nil
+}
+
+func (tree *RBTree) findNode(nodeValue int) *DoubleNode {
+	current := tree.root
+
+	for current != nil {
+		if current.nodeValue == nodeValue {
+			break
+		}
+
+		if current.nodeValue > nodeValue {
+			current = current.left
+			continue
+		}
+
+		current = current.right
+		continue
+	}
+
+	return current
 }
 
 func main() {

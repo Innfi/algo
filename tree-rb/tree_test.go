@@ -229,3 +229,11 @@ func TestMediumCase2(t *testing.T) {
 	assert.Equal(t, CheckConstraintColor(tree.root), true)
 	assert.Equal(t, CheckConstraintDepth(tree.root), true)
 }
+
+func TestDeleteNodeSingle(t *testing.T) {
+	tree := CreatePreset([]int{1})
+
+	tree.Delete(1)
+
+	assert.Equal(t, tree.root == nil, true)
+}
