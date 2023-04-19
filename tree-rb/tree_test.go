@@ -36,13 +36,13 @@ DONE
 */
 
 func TestLink(t *testing.T) {
-	rootNode := DoubleNode{
+	rootNode := TreeNode{
 		nodeValue: 1,
 		left:      nil,
 		right:     nil,
 	}
 
-	secondNode := DoubleNode{
+	secondNode := TreeNode{
 		nodeValue: 2,
 		left:      &rootNode,
 		right:     nil,
@@ -56,7 +56,7 @@ func TestLink(t *testing.T) {
 
 func TestStateChange(t *testing.T) {
 	tree := RBTree{}
-	tree.root = &DoubleNode{
+	tree.root = &TreeNode{
 		nodeValue: 3,
 		left:      nil,
 		right:     nil,
@@ -180,17 +180,17 @@ func TestDepthCheckerValidCase(t *testing.T) {
 }
 
 func TestDepthCheckerInvalidCase(t *testing.T) {
-	root := NewDoubleNode(10, BLACK)
-	root.left = NewDoubleNode(5, RED)
+	root := NewTreeNode(10, BLACK)
+	root.left = NewTreeNode(5, RED)
 	root.left.parent = root
 
-	root.left.left = NewDoubleNode(3, BLACK)
+	root.left.left = NewTreeNode(3, BLACK)
 	root.left.left.parent = root.left
 
-	root.left.right = NewDoubleNode(7, RED)
+	root.left.right = NewTreeNode(7, RED)
 	root.left.right.parent = root.left
 
-	root.left.left.left = NewDoubleNode(1, BLACK)
+	root.left.left.left = NewTreeNode(1, BLACK)
 	root.left.left.left.parent = root.left.left
 
 	assert.Equal(t, CheckConstraintDepth(root), false)

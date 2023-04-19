@@ -12,7 +12,7 @@ func CreatePreset(input []int) RBTree {
 	return tree
 }
 
-func CheckConstraintColor(node *DoubleNode) bool {
+func CheckConstraintColor(node *TreeNode) bool {
 	if node == nil {
 		return true
 	}
@@ -36,7 +36,7 @@ func CheckConstraintColor(node *DoubleNode) bool {
 	return true
 }
 
-func CheckConstraintDepth(node *DoubleNode) bool {
+func CheckConstraintDepth(node *TreeNode) bool {
 	depths := []int{}
 
 	Depth(node, &depths)
@@ -55,7 +55,7 @@ func CheckConstraintDepth(node *DoubleNode) bool {
 	return true
 }
 
-func Depth(node *DoubleNode, depths *[]int) {
+func Depth(node *TreeNode, depths *[]int) {
 	if node == nil {
 		return
 	}
@@ -89,13 +89,13 @@ func Depth(node *DoubleNode, depths *[]int) {
 	*depths = append(*depths, depth)
 }
 
-func PrintTreeBFS(node *DoubleNode) {
+func PrintTreeBFS(node *TreeNode) {
 	if node == nil {
 		return
 	}
 	fmt.Printf("----------------------\n")
-	traverseTarget := []*DoubleNode{}
-	nodesByBFS := []*DoubleNode{}
+	traverseTarget := []*TreeNode{}
+	nodesByBFS := []*TreeNode{}
 
 	traverseTarget = append(traverseTarget, node)
 

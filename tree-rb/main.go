@@ -9,11 +9,19 @@ const (
 	BLACK Color = iota
 )
 
-func (node *DoubleNode) GrandParent() *DoubleNode {
+type TreeNode struct {
+	nodeValue int
+	left      *TreeNode
+	right     *TreeNode
+	parent    *TreeNode
+	color     Color
+}
+
+func (node *TreeNode) GrandParent() *TreeNode {
 	return node.parent.parent
 }
 
-func IsLeftChild(node *DoubleNode) bool {
+func IsLeftChild(node *TreeNode) bool {
 	if node.parent == nil {
 	}
 
@@ -24,7 +32,7 @@ func IsLeftChild(node *DoubleNode) bool {
 	return false
 }
 
-func (node *DoubleNode) ParentOpposite() *DoubleNode {
+func (node *TreeNode) ParentOpposite() *TreeNode {
 	grandParent := node.parent.parent
 
 	if grandParent.left != nil && grandParent.left.nodeValue == node.parent.nodeValue {
@@ -34,20 +42,8 @@ func (node *DoubleNode) ParentOpposite() *DoubleNode {
 	return grandParent.left
 }
 
-type DoubleNode struct {
-	nodeValue int
-	left      *DoubleNode
-	right     *DoubleNode
-	parent    *DoubleNode
-	color     Color
-}
-
-type RBTree struct {
-	root *DoubleNode
-}
-
-func NewDoubleNode(nodeValue int, color Color) *DoubleNode {
-	return &DoubleNode{
+func NewTreeNode(nodeValue int, color Color) *TreeNode {
+	return &TreeNode{
 		nodeValue: nodeValue,
 		left:      nil,
 		right:     nil,
@@ -56,7 +52,7 @@ func NewDoubleNode(nodeValue int, color Color) *DoubleNode {
 	}
 }
 
-func IsDoubleRed(node *DoubleNode) bool {
+func IsDoubleRed(node *TreeNode) bool {
 	if node.color != RED {
 		return false
 	}
@@ -68,9 +64,13 @@ func IsDoubleRed(node *DoubleNode) bool {
 	return true
 }
 
+type RBTree struct {
+	root *TreeNode
+}
+
 func (tree *RBTree) Insert(nodeValue int) {
 	if tree.root == nil {
-		tree.root = NewDoubleNode(nodeValue, BLACK)
+		tree.root = NewTreeNode(nodeValue, BLACK)
 		return
 	}
 
@@ -78,10 +78,10 @@ func (tree *RBTree) Insert(nodeValue int) {
 	tree.rebalanceRB(newNode)
 }
 
-func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
+func (tree *RBTree) insertBinary(node *TreeNode, newValue int) *TreeNode {
 	if node.nodeValue > newValue {
 		if node.left == nil {
-			node.left = NewDoubleNode(newValue, RED)
+			node.left = NewTreeNode(newValue, RED)
 			node.left.parent = node
 			return node.left
 		}
@@ -90,7 +90,7 @@ func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
 	}
 
 	if node.right == nil {
-		node.right = NewDoubleNode(newValue, RED)
+		node.right = NewTreeNode(newValue, RED)
 		node.right.parent = node
 		return node.right
 	}
@@ -98,7 +98,7 @@ func (tree *RBTree) insertBinary(node *DoubleNode, newValue int) *DoubleNode {
 	return tree.insertBinary(node.right, newValue)
 }
 
-func (tree *RBTree) rebalanceRB(node *DoubleNode) {
+func (tree *RBTree) rebalanceRB(node *TreeNode) {
 	if node.GrandParent() == nil {
 		return
 	}
@@ -154,7 +154,7 @@ func (tree *RBTree) rebalanceRB(node *DoubleNode) {
 	tree.root.color = BLACK
 }
 
-func (tree *RBTree) rotateLeft(node *DoubleNode) {
+func (tree *RBTree) rotateLeft(node *TreeNode) {
 	newLeft := node.GrandParent()
 	newLeftRight := node.parent.left
 
@@ -198,7 +198,7 @@ func (tree *RBTree) rotateLeft(node *DoubleNode) {
 	}
 }
 
-func (tree *RBTree) rotateRight(node *DoubleNode) {
+func (tree *RBTree) rotateRight(node *TreeNode) {
 	newRight := node.GrandParent()
 	newRightLeft := node.parent.right
 
@@ -242,7 +242,7 @@ func (tree *RBTree) rotateRight(node *DoubleNode) {
 	}
 }
 
-func (tree *RBTree) rotateRightSingle(node *DoubleNode) {
+func (tree *RBTree) rotateRightSingle(node *TreeNode) {
 	grandParent := node.GrandParent()
 	newParent := node
 	newChild := node.parent
@@ -259,7 +259,7 @@ func (tree *RBTree) rotateRightSingle(node *DoubleNode) {
 	newChild.parent = newParent
 }
 
-func (tree *RBTree) rotateLeftSingle(node *DoubleNode) {
+func (tree *RBTree) rotateLeftSingle(node *TreeNode) {
 	grandParent := node.GrandParent()
 	newParent := node
 	newChild := node.parent
@@ -291,7 +291,7 @@ func (tree *RBTree) Delete(nodeValue int) {
 	targetNode = nil
 }
 
-func (tree *RBTree) findNode(nodeValue int) *DoubleNode {
+func (tree *RBTree) findNode(nodeValue int) *TreeNode {
 	current := tree.root
 
 	for current != nil {
@@ -309,6 +309,25 @@ func (tree *RBTree) findNode(nodeValue int) *DoubleNode {
 	}
 
 	return current
+}
+
+func (tree *RBTree) swapNode(from *TreeNode, to *TreeNode) {
+	if from.parent == nil {
+		tree.root = to
+		return
+	}
+
+	if from.parent.left != nil && from.nodeValue == from.parent.left.nodeValue {
+		from.parent.left = to
+		to.parent = from.parent
+		return
+	}
+
+	if from.parent.right != nil && from.nodeValue == from.parent.right.nodeValue {
+		from.parent.right = to
+		to.parent = from.parent
+		return
+	}
 }
 
 func main() {
