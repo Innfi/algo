@@ -283,12 +283,41 @@ func (tree *RBTree) Delete(nodeValue int) {
 		return
 	}
 
-	// just enough to pass the test
-	if targetNode.parent == nil {
-		tree.root = nil
+	currentNode := targetNode
+	originalColor := currentNode.color
+
+	fixNode := currentNode
+
+	if targetNode.left == nil {
+		fixNode = targetNode.right
+		tree.swapNode(targetNode, targetNode.right)
+	} else if targetNode.right == nil {
+		fixNode = targetNode.left
+		tree.swapNode(targetNode, targetNode.left)
+	} else {
+		currentNode = tree.findMinimumNode(targetNode.right)
+		originalColor = currentNode.color
+		fixNode = currentNode.right
+		if currentNode.parent == targetNode {
+			fixNode.parent = targetNode
+		} else {
+			tree.swapNode(currentNode, currentNode.right)
+			currentNode.right = targetNode.right
+			currentNode.right.parent = currentNode
+		}
+
+		tree.swapNode(targetNode, currentNode)
+		currentNode.left = targetNode.left
+		currentNode.left.parent = currentNode
+		currentNode.color = targetNode.color
 	}
 
-	targetNode = nil
+	if originalColor == BLACK {
+		return
+	}
+
+	//TODO: fixDelete
+	tree.fixDelete(fixNode)
 }
 
 func (tree *RBTree) findNode(nodeValue int) *TreeNode {
@@ -328,6 +357,20 @@ func (tree *RBTree) swapNode(from *TreeNode, to *TreeNode) {
 		to.parent = from.parent
 		return
 	}
+}
+
+func (tree *RBTree) findMinimumNode(targetNode *TreeNode) *TreeNode {
+	minimumNode := targetNode
+
+	for targetNode.left != nil {
+		minimumNode = targetNode.left
+	}
+
+	return minimumNode
+}
+
+func (tree *RBTree) fixDelete(fixNode *TreeNode) {
+
 }
 
 func main() {
