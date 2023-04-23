@@ -246,6 +246,7 @@ func (tree *RBTree) rotateRightSingle(node *TreeNode) {
 	grandParent := node.GrandParent()
 	newParent := node
 	newChild := node.parent
+	newRightLeft := node.right
 
 	grandParent.right = nil
 	newParent.parent = nil
@@ -257,12 +258,18 @@ func (tree *RBTree) rotateRightSingle(node *TreeNode) {
 
 	newParent.right = newChild
 	newChild.parent = newParent
+
+	newChild.left = newRightLeft
+	if newRightLeft != nil {
+		newRightLeft.parent = newChild
+	}
 }
 
 func (tree *RBTree) rotateLeftSingle(node *TreeNode) {
 	grandParent := node.GrandParent()
 	newParent := node
 	newChild := node.parent
+	newLeftRight := node.left
 
 	grandParent.left = nil
 	newParent.parent = nil
@@ -274,6 +281,11 @@ func (tree *RBTree) rotateLeftSingle(node *TreeNode) {
 
 	newParent.left = newChild
 	newChild.parent = newParent
+
+	newChild.right = newLeftRight
+	if newLeftRight != nil {
+		newLeftRight.parent = newChild
+	}
 }
 
 func (tree *RBTree) Delete(nodeValue int) {
@@ -370,7 +382,77 @@ func (tree *RBTree) findMinimumNode(targetNode *TreeNode) *TreeNode {
 }
 
 func (tree *RBTree) fixDelete(fixNode *TreeNode) {
+	current := fixNode
 
+	for current != tree.root && current.color == BLACK {
+		if IsLeftChild(current) {
+			sibling := current.parent.right
+			if sibling != nil && sibling.color == RED {
+				sibling.color = BLACK
+				current.parent.color = RED
+				tree.rotateLeftSingle(current.parent)
+
+				sibling = current.parent.right
+			}
+
+			if sibling != nil &&
+				sibling.left != nil && sibling.left.color == BLACK &&
+				sibling.right != nil && sibling.right.color == BLACK {
+				sibling.color = RED
+				current = current.parent
+			} else {
+				if sibling.right != nil && sibling.right.color == BLACK {
+					if sibling.left != nil {
+						sibling.left.color = BLACK
+					}
+
+					sibling.color = RED
+					tree.rotateRightSingle(sibling)
+					sibling = current.parent.right
+				}
+
+				sibling.color = current.parent.color
+				current.parent.color = BLACK
+				sibling.right.color = BLACK
+				tree.rotateLeftSingle(current.parent)
+				current = tree.root
+			}
+		} else {
+			sibling := current.parent.left
+			if sibling != nil && sibling.color == RED {
+				sibling.color = BLACK
+				current.parent.color = RED
+				tree.rotateRightSingle(current.parent)
+
+				sibling = current.parent.left
+			}
+
+			if sibling != nil &&
+				sibling.left != nil && sibling.left.color == BLACK &&
+				sibling.right != nil && sibling.right.color == BLACK {
+				sibling.color = RED
+				current = current.parent
+			} else {
+				if sibling.left != nil && sibling.left.color == BLACK {
+					if sibling.right != nil {
+						sibling.right.color = BLACK
+					}
+
+					sibling.color = RED
+					tree.rotateLeftSingle(sibling)
+					sibling = current.parent.left
+				}
+
+				sibling.color = current.parent.color
+				current.parent.color = BLACK
+				sibling.right.color = BLACK
+				tree.rotateRightSingle(current.parent)
+				current = tree.root
+			}
+		}
+
+		current.color = BLACK
+	}
 }
 
 func main() {
