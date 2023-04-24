@@ -6,6 +6,9 @@ func CreatePreset(input []int) RBTree {
 	tree := RBTree{}
 
 	for _, elem := range input {
+		// if elem == 3 {
+		// 	fmt.Printf("here")
+		// }
 		tree.Insert(elem)
 	}
 

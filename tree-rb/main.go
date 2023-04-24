@@ -115,7 +115,8 @@ func (tree *RBTree) rebalanceRB(node *TreeNode) {
 				node = node.GrandParent()
 			} else {
 				if IsLeftChild(node) {
-					tree.rotateRightSingle(node)
+					// tree.rotateRightSingle(node)
+					tree.rotateRightV2(node)
 					node = node.right
 				}
 
@@ -140,18 +141,22 @@ func (tree *RBTree) rebalanceRB(node *TreeNode) {
 					node = node.left
 				}
 
-				tree.rotateRight(node)
+				tree.rotateRightV2(node.parent)
 
 				node = node.parent
 				node.color = BLACK
 				if node.parent != nil {
 					node.parent.color = RED
 				}
+				if node.right != nil {
+					node.right.color = RED
+				}
 			}
 		}
 	}
 
 	tree.root.color = BLACK
+	tree.root.parent = nil
 }
 
 func (tree *RBTree) rotateLeft(node *TreeNode) {
@@ -286,6 +291,54 @@ func (tree *RBTree) rotateLeftSingle(node *TreeNode) {
 	if newLeftRight != nil {
 		newLeftRight.parent = newChild
 	}
+}
+
+func (tree *RBTree) rotateRightV2(node *TreeNode) {
+	if node.parent == nil {
+		return
+	}
+
+	grandParent := node.GrandParent()
+
+	if grandParent == nil {
+		newRight := node.parent
+		newRightLeft := node.right
+
+		tree.root = node
+		node.right = newRight
+		newRight.parent = node
+
+		newRight.left = newRightLeft
+		if newRightLeft != nil {
+			newRightLeft.parent = newRight
+		}
+
+		return
+	}
+
+	isLeftChild := true
+	if grandParent.right != nil && grandParent.right.nodeValue == node.parent.nodeValue {
+		isLeftChild = false
+	}
+
+	newRight := node.parent
+	newRightLeft := node.right
+
+	node.right = newRight
+	newRight.parent = node
+
+	newRight.left = newRightLeft
+	if newRightLeft != nil {
+		newRightLeft.parent = newRight
+	}
+
+	if isLeftChild {
+		grandParent.left = node
+	} else {
+		grandParent.right = node
+	}
+
+	node.parent = grandParent
 }
 
 func (tree *RBTree) Delete(nodeValue int) {
