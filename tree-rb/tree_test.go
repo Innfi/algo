@@ -230,10 +230,36 @@ func TestMediumCase2(t *testing.T) {
 	assert.Equal(t, CheckConstraintDepth(tree.root), true)
 }
 
-// func TestDeleteNodeSingle(t *testing.T) {
-// 	tree := CreatePreset([]int{1})
-//
-// 	tree.Delete(1)
-//
-// 	assert.Equal(t, tree.root == nil, true)
-// }
+func TestDeleteNodeSingle(t *testing.T) {
+	tree := CreatePreset([]int{1})
+
+	tree.Delete(1)
+
+	assert.Equal(t, tree.root == nil, true)
+}
+
+func TestDeleteChildrenSimple(t *testing.T) {
+	tree := CreatePreset([]int{2, 1, 3})
+
+	tree.Delete(1)
+
+	assert.Equal(t, tree.root.nodeValue, 2)
+}
+
+func TestDeleteRootSimple(t *testing.T) {
+	tree := CreatePreset([]int{2, 1, 3})
+
+	tree.Delete(2)
+
+	assert.Equal(t, tree.root.nodeValue, 3)
+}
+
+func TestDeleteMiddle(t *testing.T) {
+	tree := CreatePreset([]int{2, 1, 3, 4})
+
+	tree.Delete(3)
+
+	assert.Equal(t, tree.root.nodeValue, 2)
+	assert.Equal(t, tree.root.right.nodeValue, 4)
+	assert.Equal(t, tree.root.right.color, BLACK)
+}

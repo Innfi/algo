@@ -268,25 +268,31 @@ func (tree *RBTree) Delete(nodeValue int) {
 		currentNode = tree.findMinimumNode(targetNode.right)
 		originalColor = currentNode.color
 		fixNode = currentNode.right
-		if currentNode.parent == targetNode {
+		if currentNode.parent == targetNode && fixNode != nil {
 			fixNode.parent = targetNode
 		} else {
 			tree.swapNode(currentNode, currentNode.right)
 			currentNode.right = targetNode.right
-			currentNode.right.parent = currentNode
+
+			if currentNode.right != nil {
+				currentNode.right.parent = currentNode
+			}
 		}
 
 		tree.swapNode(targetNode, currentNode)
 		currentNode.left = targetNode.left
-		currentNode.left.parent = currentNode
+
+		if currentNode.left != nil {
+			currentNode.left.parent = currentNode
+		}
+
 		currentNode.color = targetNode.color
 	}
 
-	if originalColor == BLACK {
+	if originalColor == BLACK || fixNode == nil {
 		return
 	}
 
-	//TODO: fixDelete
 	tree.fixDelete(fixNode)
 }
 
@@ -318,13 +324,17 @@ func (tree *RBTree) swapNode(from *TreeNode, to *TreeNode) {
 
 	if from.parent.left != nil && from.nodeValue == from.parent.left.nodeValue {
 		from.parent.left = to
-		to.parent = from.parent
+		if to != nil {
+			to.parent = from.parent
+		}
 		return
 	}
 
 	if from.parent.right != nil && from.nodeValue == from.parent.right.nodeValue {
 		from.parent.right = to
-		to.parent = from.parent
+		if to != nil {
+			to.parent = from.parent
+		}
 		return
 	}
 }
