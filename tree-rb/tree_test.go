@@ -258,8 +258,9 @@ func TestDeleteMiddle(t *testing.T) {
 	tree := CreatePreset([]int{2, 1, 3, 4})
 
 	tree.Delete(3)
+	root := tree.root
 
-	assert.Equal(t, tree.root.nodeValue, 2)
-	assert.Equal(t, tree.root.right.nodeValue, 4)
-	assert.Equal(t, tree.root.right.color, BLACK)
+	assert.Equal(t, root.nodeValue, 2)
+	assert.Equal(t, root.right.nodeValue, 4)
+	assert.Equal(t, root.right.color, BLACK)
 }

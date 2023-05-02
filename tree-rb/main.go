@@ -268,7 +268,7 @@ func (tree *RBTree) Delete(nodeValue int) {
 		currentNode = tree.findMinimumNode(targetNode.right)
 		originalColor = currentNode.color
 		fixNode = currentNode.right
-		if currentNode.parent == targetNode && fixNode != nil {
+		if currentNode.parent.nodeValue == targetNode.nodeValue && fixNode != nil {
 			fixNode.parent = targetNode
 		} else {
 			tree.swapNode(currentNode, currentNode.right)
@@ -290,6 +290,8 @@ func (tree *RBTree) Delete(nodeValue int) {
 	}
 
 	if originalColor == BLACK || fixNode == nil {
+		currentNode.color = targetNode.color
+		tree.root.color = BLACK
 		return
 	}
 
