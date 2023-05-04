@@ -289,9 +289,12 @@ func (tree *RBTree) Delete(nodeValue int) {
 		currentNode.color = targetNode.color
 	}
 
-	if originalColor == BLACK || fixNode == nil {
+	if originalColor != BLACK || fixNode == nil {
 		currentNode.color = targetNode.color
-		tree.root.color = BLACK
+
+		if tree.root != nil {
+			tree.root.color = BLACK
+		}
 		return
 	}
 
@@ -420,9 +423,9 @@ func (tree *RBTree) fixDelete(fixNode *TreeNode) {
 				current = tree.root
 			}
 		}
-
-		current.color = BLACK
 	}
+
+	fixNode.color = BLACK
 }
 
 func main() {
