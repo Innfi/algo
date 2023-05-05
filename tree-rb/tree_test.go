@@ -17,7 +17,6 @@ import (
 
 TOOD
 --------------------------------------------------------------------------------
-- remove node(s)
 
 DONE
 --------------------------------------------------------------------------------
@@ -33,6 +32,7 @@ DONE
 	- medium case 2: 8 7 6 5 4 3 2 1
 - utility function for instance creation
 - constraint checker
+- remove node(s)
 */
 
 func TestLink(t *testing.T) {
@@ -263,4 +263,15 @@ func TestDeleteMiddle(t *testing.T) {
 	assert.Equal(t, root.nodeValue, 2)
 	assert.Equal(t, root.right.nodeValue, 4)
 	assert.Equal(t, root.right.color, BLACK)
+}
+
+func TestDeleteIntermediate(t *testing.T) {
+	tree := CreatePreset([]int{8, 7, 6, 5, 4, 3, 2, 1})
+
+	tree.Delete(3)
+	root := tree.root
+
+	assert.Equal(t, root.nodeValue, 5)
+
+	PrintTreeBFS(tree.root)
 }
