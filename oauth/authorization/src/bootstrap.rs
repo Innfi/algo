@@ -5,11 +5,14 @@ use serde::{Deserialize, Serialize};
 /**
  * TODO
  * -----------------------------------------------------------------------------
- * POST /auth -> auth code
- * POST /token
+ * create dummy user
+ * create dummy client
+ * create dummy resource server
  * 
  * DONE
  * -----------------------------------------------------------------------------
+ * dummy POST /auth -> auth code
+ * dummy POST /token
  */
 
 pub fn run_server() -> Result<Server, std::io::Error> {
@@ -38,6 +41,19 @@ struct AuthCodeResponse {
   pub auth_code: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct TokenPayload {
+  pub auth_code: String,
+  pub client_id: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct TokenResponse {
+  pub msg: String,
+  pub access_token: String,
+  pub refresh_token: String,
+}
+
 #[post("/auth")]
 async fn handle_auth_code(payload: web::Json<AuthCodePayload>) -> web::Json<AuthCodeResponse> {
   debug!("{:?}", payload);
@@ -45,6 +61,19 @@ async fn handle_auth_code(payload: web::Json<AuthCodePayload>) -> web::Json<Auth
   let result = AuthCodeResponse {
     msg: String::from("test"),
     auth_code: String::from("auth_code")
+  };
+
+  web::Json(result)
+}
+
+#[post("/token")]
+async fn handle_gen_token(payload: web::Json<TokenPayload>) -> web::Json<TokenResponse> {
+  debug!("{:?}", payload);
+
+  let result = TokenResponse {
+    msg: String::from("success"),
+    access_token: String::from("test_access_token"),
+    refresh_token: String::from("test_refresh_token"),
   };
 
   web::Json(result)
