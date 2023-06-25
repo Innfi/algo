@@ -1,6 +1,10 @@
-use actix_web::{dev::Server, web, App, HttpResponse, HttpServer, post};
-use log::{info, debug};
-use serde::{Deserialize, Serialize};
+use actix_web::{dev::Server, post, web, App, HttpResponse, HttpServer};
+use log::{debug, info};
+
+use crate::auth_service::AuthService;
+use crate::entity::{
+  AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
+};
 
 /**
  * TODO
@@ -8,7 +12,7 @@ use serde::{Deserialize, Serialize};
  * create dummy user
  * create dummy client
  * create dummy resource server
- * 
+ *
  * DONE
  * -----------------------------------------------------------------------------
  * dummy POST /auth -> auth code
@@ -16,58 +20,37 @@ use serde::{Deserialize, Serialize};
  */
 
 pub fn run_server() -> Result<Server, std::io::Error> {
-  let server =
-    HttpServer::new(move || {
-      App::new()
+  let auth_service = web::Data::new(AuthService {});
+
+  let server = HttpServer::new(move || {
+    App::new()
       .route("/", web::get().to(start))
       .service(handle_auth_code)
-    })
-      .bind("127.0.0.1:8080")?
-      .run();
+      .app_data(auth_service.clone())
+  })
+  .bind("127.0.0.1:8080")?
+  .run();
 
   Ok(server)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct AuthCodePayload {
-  pub client_id: String, //redundant?
-  pub id: String,
-  pub password: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct AuthCodeResponse {
-  pub msg: String,
-  pub auth_code: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct TokenPayload {
-  pub auth_code: String,
-  pub client_id: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct TokenResponse {
-  pub msg: String,
-  pub access_token: String,
-  pub refresh_token: String,
-}
-
 #[post("/auth")]
-async fn handle_auth_code(payload: web::Json<AuthCodePayload>) -> web::Json<AuthCodeResponse> {
+async fn handle_auth_code(
+  auth_service: web::Data<AuthService>,
+  payload: web::Json<AuthCodePayload>,
+) -> web::Json<AuthCodeResponse> {
   debug!("{:?}", payload);
 
-  let result = AuthCodeResponse {
-    msg: String::from("test"),
-    auth_code: String::from("auth_code")
-  };
+  let result = auth_service.handle_auth_code(payload);
+  if result.is_err() {}
 
-  web::Json(result)
+  web::Json(result.unwrap())
 }
 
 #[post("/token")]
-async fn handle_gen_token(payload: web::Json<TokenPayload>) -> web::Json<TokenResponse> {
+async fn handle_gen_token(
+  payload: web::Json<TokenPayload>,
+) -> web::Json<TokenResponse> {
   debug!("{:?}", payload);
 
   let result = TokenResponse {
