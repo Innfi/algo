@@ -9,14 +9,16 @@ use crate::entity::{
 /**
  * TODO
  * -----------------------------------------------------------------------------
- * create dummy user
- * create dummy client
  * create dummy resource server
+ * create dummy client
+ * test with dummy user
  *
  * DONE
  * -----------------------------------------------------------------------------
  * dummy POST /auth -> auth code
  * dummy POST /token
+ * service for authorization
+ * e2e test
  */
 
 pub fn run_server() -> Result<Server, std::io::Error> {
@@ -26,6 +28,7 @@ pub fn run_server() -> Result<Server, std::io::Error> {
     App::new()
       .route("/", web::get().to(start))
       .service(handle_auth_code)
+      .service(handle_gen_token)
       .app_data(auth_service.clone())
   })
   .bind("127.0.0.1:8080")?
@@ -49,17 +52,15 @@ async fn handle_auth_code(
 
 #[post("/token")]
 async fn handle_gen_token(
+  auth_service: web::Data<AuthService>,
   payload: web::Json<TokenPayload>,
 ) -> web::Json<TokenResponse> {
   debug!("{:?}", payload);
 
-  let result = TokenResponse {
-    msg: String::from("success"),
-    access_token: String::from("test_access_token"),
-    refresh_token: String::from("test_refresh_token"),
-  };
+  let result = auth_service.handle_generate_token(payload);
+  if result.is_err() {}
 
-  web::Json(result)
+  web::Json(result.unwrap())
 }
 
 async fn start() -> HttpResponse {
