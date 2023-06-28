@@ -19,7 +19,7 @@ pub fn run_server() -> Result<Server, std::io::Error> {
     App::new()
       .route("/", web::get().to(dummy_resource))
   })
-  .bind("127.0.0.1:3000")?
+  .bind("0.0.0.0:3000")?
   .run();
 
   Ok(server)
