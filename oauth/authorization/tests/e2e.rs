@@ -1,4 +1,8 @@
-use authorization::entity::{AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse};
+use actix_web::web;
+use authorization::auth_data::{AuthDataAdapter, AuthDataService};
+use authorization::entity::{
+  AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
+};
 
 #[tokio::test]
 async fn test_health_check() {
@@ -49,7 +53,7 @@ async fn test_post_token_success() {
 
   let payload = TokenPayload {
     auth_code: String::from("auth_code"),
-    client_id: String::from("test")
+    client_id: String::from("test"),
   };
 
   let response = client
@@ -62,17 +66,26 @@ async fn test_post_token_success() {
 
   assert!(response.status().is_success());
 
-  let token_response: TokenResponse = 
+  let token_response: TokenResponse =
     response.json().await.expect("json deserialize failed");
 
   assert_eq!(token_response.msg, String::from("success"));
-  assert_eq!(token_response.access_token, String::from("dummy_access_token"));
-  assert_eq!(token_response.refresh_token, String::from("dummy_refresh_token"));
+  assert_eq!(
+    token_response.access_token,
+    String::from("dummy_access_token")
+  );
+  assert_eq!(
+    token_response.refresh_token,
+    String::from("dummy_refresh_token")
+  );
 }
 
 async fn spawn_app() {
-  let server =
-    authorization::bootstrap::run_server().expect("failed to start server");
+  let auth_adapter = web::Data::new(AuthDataAdapter::new().await);
+  let auth_data_service = web::Data::new(AuthDataService::new(auth_adapter));
+
+  let server = authorization::bootstrap::run_server(auth_data_service)
+    .expect("failed to start server");
 
   let _ = tokio::spawn(server);
 }

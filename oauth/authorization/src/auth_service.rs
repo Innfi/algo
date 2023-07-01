@@ -1,6 +1,8 @@
 use actix_web::web;
 
-use crate::entity::{AuthCodePayload, AuthCodeResponse, TokenResponse, TokenPayload};
+use crate::entity::{
+  AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
+};
 
 pub struct AuthService {}
 
@@ -34,7 +36,10 @@ impl AuthService {
     true
   }
 
-  pub fn handle_generate_token(&self, payload: web::Json<TokenPayload>) -> Result<TokenResponse, &'static str> {
+  pub fn handle_generate_token(
+    &self,
+    payload: web::Json<TokenPayload>,
+  ) -> Result<TokenResponse, &'static str> {
     if !self.validate_auth_code(payload) {
       return Ok(TokenResponse {
         msg: String::from("invalid auth code"),
@@ -46,7 +51,7 @@ impl AuthService {
     Ok(TokenResponse {
       msg: String::from("success"),
       access_token: String::from("dummy_access_token"),
-      refresh_token: String::from("dummy_refresh_token")
+      refresh_token: String::from("dummy_refresh_token"),
     })
   }
 

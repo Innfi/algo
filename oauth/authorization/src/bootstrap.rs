@@ -1,6 +1,7 @@
 use actix_web::{dev::Server, post, web, App, HttpResponse, HttpServer};
 use log::{debug, info};
 
+use crate::auth_data::AuthDataService;
 use crate::auth_service::AuthService;
 use crate::entity::{
   AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
@@ -21,9 +22,9 @@ use crate::entity::{
  * e2e test
  */
 
-pub fn run_server() -> Result<Server, std::io::Error> {
-  let auth_service = web::Data::new(AuthService {});
-
+pub fn run_server(
+  auth_service: web::Data<AuthDataService>,
+) -> Result<Server, std::io::Error> {
   let server = HttpServer::new(move || {
     App::new()
       .route("/", web::get().to(start))
