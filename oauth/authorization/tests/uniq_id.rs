@@ -1,5 +1,7 @@
 use chrono::Utc;
 
+use authorization::unique_id::UniqIdGenerator;
+
 #[test]
 fn initial_test() {
   assert_eq!(1, 1);
@@ -26,4 +28,15 @@ fn test_datetime() {
   print!("snowflake_test: {}\n", snowflake_test);
 
   assert_eq!(snowflake_test > 0, true);
+}
+
+#[test]
+fn test_uniq_id_generator() {
+  let instance_lhs = UniqIdGenerator::new(1, 2);
+  let instance_rhs = UniqIdGenerator::new(2, 1);
+
+  let id_lhs: i64 = instance_lhs.get_one();
+  let id_rhs: i64 = instance_rhs.get_one();
+
+  assert_eq!(id_lhs != id_rhs, true);
 }
