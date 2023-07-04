@@ -2,11 +2,7 @@ use actix_web::{dev::Server, web, App, HttpServer};
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct TokenPayload {
-  access_token: String,
-  refresh_token: String,
-}
+use crate::auth_data::TokenPayload;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResourceResponse {
