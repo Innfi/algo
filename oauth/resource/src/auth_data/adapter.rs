@@ -1,7 +1,7 @@
-use std::env;
 use sqlx::MySqlPool;
+use std::env;
 
-use super::{TokenPayload, AuthData};
+use super::{AuthData, TokenPayload};
 
 pub struct AuthTokenAdapter {
   pub connection_pool: MySqlPool,
@@ -18,9 +18,12 @@ impl AuthTokenAdapter {
     }
   }
 
-  pub async fn select_auth_data(&self, payload: TokenPayload) -> Result<AuthData, &'static str> {
+  pub async fn select_auth_data(
+    &self,
+    payload: TokenPayload,
+  ) -> Result<AuthData, &'static str> {
     let select_result = sqlx::query!(
-      r#"SELECT id FROM auth_data WHERE access_token=? AND refresh_token=?; "#,
+      r#"SELECT id, access_token, refresh_token FROM auth_data WHERE access_token=? AND refresh_token=?; "#,
       payload.access_token,
       payload.refresh_token,
     )
@@ -35,8 +38,8 @@ impl AuthTokenAdapter {
 
     Ok(AuthData {
       id: result_object.id,
-      access_token: result_object.access_token,
-      refresh_token: result_object.refresh_token,
+      access_token: result_object.access_token.unwrap(),
+      refresh_token: result_object.refresh_token.unwrap(),
       created_at: None,
       updated_at: None,
     })

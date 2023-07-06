@@ -1,8 +1,11 @@
-use actix_web::{dev::Server, web, App, HttpServer};
+use actix_web::{
+  dev::Server, get, web, App, Error, HttpRequest, HttpResponse, HttpServer,
+};
+use actix_web_lab::middleware::from_fn;
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::auth_data::TokenPayload;
+use crate::middleware::auth_middleware;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResourceResponse {
@@ -13,7 +16,8 @@ pub struct ResourceResponse {
 pub fn run_server() -> Result<Server, std::io::Error> {
   let server = HttpServer::new(move || {
     App::new()
-      .route("/", web::get().to(dummy_resource))
+      .wrap(from_fn(auth_middleware))
+      .service(dummy_resource)
   })
   .bind("0.0.0.0:3000")?
   .run();
@@ -21,11 +25,25 @@ pub fn run_server() -> Result<Server, std::io::Error> {
   Ok(server)
 }
 
-async fn dummy_resource(payload: web::Json<TokenPayload>) -> web::Json<ResourceResponse> {
-  debug!("{:?}", payload);
+#[get("/{id}")]
+async fn dummy_resource(req: HttpRequest) -> web::Json<ResourceResponse> {
+  // debug!("{:?}", payload);
+  let id = req.match_info().get("id").expect("id not found");
+  debug!("id: {}", id);
 
   web::Json(ResourceResponse {
     string_data: String::from("resource string"),
     number_data: 1,
   })
+}
+
+#[get("/test/{param}")]
+async fn another_get(req: HttpRequest) -> Result<HttpResponse, Error> {
+  let param = req.match_info().get("param").expect("param not found");
+  debug!("param: {}", param);
+
+  Ok(HttpResponse::Ok().json(ResourceResponse {
+    string_data: String::from("from /test/param"),
+    number_data: 2,
+  }))
 }

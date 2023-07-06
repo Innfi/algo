@@ -7,21 +7,6 @@ use crate::entity::{
   AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
 };
 
-/**
- * TODO
- * -----------------------------------------------------------------------------
- * create dummy resource server
- * create dummy client
- * test with dummy user
- *
- * DONE
- * -----------------------------------------------------------------------------
- * dummy POST /auth -> auth code
- * dummy POST /token
- * service for authorization
- * e2e test
- */
-
 pub fn run_server(
   auth_service: web::Data<AuthDataService>,
 ) -> Result<Server, std::io::Error> {

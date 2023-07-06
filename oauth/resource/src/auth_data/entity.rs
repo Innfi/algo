@@ -1,10 +1,10 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TokenPayload {
-  access_token: String,
-  refresh_token: String,
+  pub access_token: String,
+  pub refresh_token: String,
 }
 
 #[derive(Serialize, Deserialize)]

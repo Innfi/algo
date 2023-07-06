@@ -21,6 +21,7 @@ env_logger = "0.10.0"
 chrono = { version = "0.4.24", features = ["serde"] }
 sqlx-cli = "0.6.3"
 futures-util = "0.3"
+actix-web-lab = "0.19.1"
 
 [dependencies.sqlx]
 version = "0.6.3"
