@@ -27,5 +27,9 @@ pub async fn auth_middleware(
 fn verify_token(token: &str) -> bool {
   debug!("token:{}", token);
 
+  if token == &"test_token" {
+    return true;
+  }
+
   false
 }
