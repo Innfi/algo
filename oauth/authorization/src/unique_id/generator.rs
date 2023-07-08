@@ -18,9 +18,9 @@ impl UniqIdGenerator {
   pub fn get_one(&self) -> i64 {
     let now = Utc::now();
 
-    (now.timestamp() << 22) |
-    ((self.instance_id << 17) as i64) |
-    ((self.node_id << 12) as i64) |
-    (self.sequence_id as i64)
+    (now.timestamp() << 22)
+      | ((self.instance_id << 17) as i64)
+      | ((self.node_id << 12) as i64)
+      | (self.sequence_id as i64)
   }
 }

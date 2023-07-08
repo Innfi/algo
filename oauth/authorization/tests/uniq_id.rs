@@ -18,10 +18,10 @@ fn test_datetime() {
   let node_id: i32 = 4567;
   let sequence_id: i32 = 11;
 
-  let snowflake_test: i64 = (as_timestamp << 22) |
-    ((instance_id << 17) as i64) |
-    ((node_id << 12) as i64) |
-    (sequence_id as i64);
+  let snowflake_test: i64 = (as_timestamp << 22)
+    | ((instance_id << 17) as i64)
+    | ((node_id << 12) as i64)
+    | (sequence_id as i64);
 
   assert_eq!(as_timestamp > 0, true);
 

@@ -1,6 +1,7 @@
+use chrono::{DateTime, Utc};
 use log::error;
 use sqlx::MySqlPool;
-use std::env;
+// use std::env;
 
 use crate::auth_data::entity::{AuthData, ClientAuthPayload};
 
@@ -14,7 +15,9 @@ pub struct AuthDataAdapter {
 
 impl AuthDataAdapter {
   pub async fn new() -> Self {
-    let db_url = env::var("DATABASE_URL").expect("failed to get database url");
+    //let db_url = env::var("DATABASE_URL").expect("failed to get database url");
+    let db_url =
+      String::from("mysql://innfislocal:test1234@localhost:3306/innfi");
 
     Self {
       connection_pool: MySqlPool::connect(db_url.as_str())
@@ -47,10 +50,12 @@ impl AuthDataAdapter {
     &self,
     client_id: &String,
     auth_code: &String,
+    valid_until: &DateTime<Utc>,
   ) -> Result<UpdateAuthCodeResult, &'static str> {
     let update_result = sqlx::query!(
-      r#"UPDATE auth_data SET auth_code=? WHERE client_id=?;"#,
+      r#"UPDATE auth_data SET auth_code=?, auth_code_valid_until=? WHERE client_id=?;"#,
       auth_code,
+      valid_until,
       client_id,
     )
     .execute(&self.connection_pool)
@@ -88,8 +93,11 @@ impl AuthDataAdapter {
       client_id: result_object.client_id,
       client_pass: result_object.client_pass,
       auth_code: String::from(""),
+      auth_code_valid_until: None,
       access_token: String::from(""),
+      access_token_valid_until: None,
       refresh_token: String::from(""),
+      refresh_token_valid_until: None,
       created_at: None,
       updated_at: None,
     })
