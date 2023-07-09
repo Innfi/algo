@@ -1,10 +1,9 @@
 use actix_web::{dev::Server, post, web, App, HttpResponse, HttpServer};
 use log::{debug, info};
 
-use crate::auth_data::AuthDataService;
-use crate::auth_service::AuthService;
-use crate::entity::{
-  AuthCodePayload, AuthCodeResponse, TokenPayload, TokenResponse,
+use crate::{
+  auth_data::AuthDataService,
+  entity::{AuthCodeResponse, ClientAuthPayload, TokenPayload, TokenResponse},
 };
 
 pub fn run_server(
@@ -25,12 +24,12 @@ pub fn run_server(
 
 #[post("/auth")]
 async fn handle_auth_code(
-  auth_service: web::Data<AuthService>,
-  payload: web::Json<AuthCodePayload>,
+  auth_service: web::Data<AuthDataService>,
+  payload: web::Json<ClientAuthPayload>,
 ) -> web::Json<AuthCodeResponse> {
   debug!("{:?}", payload);
 
-  let result = auth_service.handle_auth_code(payload);
+  let result = auth_service.generate_auth_code(&payload).await;
   if result.is_err() {}
 
   web::Json(result.unwrap())
@@ -38,12 +37,12 @@ async fn handle_auth_code(
 
 #[post("/token")]
 async fn handle_gen_token(
-  auth_service: web::Data<AuthService>,
+  auth_service: web::Data<AuthDataService>,
   payload: web::Json<TokenPayload>,
 ) -> web::Json<TokenResponse> {
   debug!("{:?}", payload);
 
-  let result = auth_service.handle_generate_token(payload);
+  let result = auth_service.generate_token(&payload).await;
   if result.is_err() {}
 
   web::Json(result.unwrap())

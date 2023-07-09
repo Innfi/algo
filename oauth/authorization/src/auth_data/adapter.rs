@@ -3,7 +3,8 @@ use log::error;
 use sqlx::MySqlPool;
 // use std::env;
 
-use crate::auth_data::entity::{AuthData, ClientAuthPayload};
+use super::AuthData;
+use crate::entity::ClientAuthPayload;
 
 pub struct UpdateAuthCodeResult {
   pub msg: String,
@@ -32,8 +33,8 @@ impl AuthDataAdapter {
   ) -> Result<(), &'static str> {
     let insert_result = sqlx::query!(
       r#"INSERT INTO auth_data(client_id, client_pass) VALUES(?, ?);"#,
-      payload.client_id,
-      payload.client_pass,
+      payload.id,
+      payload.password,
     )
     .execute(&self.connection_pool)
     .await;

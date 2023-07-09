@@ -1,10 +1,11 @@
-use actix_web::web::Data;
+use actix_web::web::{self, Data};
 use chrono::{DateTime, Duration, Utc};
 use log::{debug, error};
 
-use crate::auth_data::adapter::AuthDataAdapter;
-use crate::auth_data::entity::{
-  ClientAuthPayload, GenerateAuthCodeResponse, RegisterClientResponse,
+use super::AuthDataAdapter;
+use crate::entity::{
+  AuthCodeResponse, ClientAuthPayload, RegisterClientResponse, TokenPayload,
+  TokenResponse,
 };
 
 const AUTH_CODE_LIFETIME: i64 = 1000 * 60 * 5;
@@ -43,7 +44,7 @@ impl AuthDataService {
   pub async fn generate_auth_code(
     &self,
     payload: &ClientAuthPayload,
-  ) -> Result<GenerateAuthCodeResponse, &'static str> {
+  ) -> Result<AuthCodeResponse, &'static str> {
     debug!("generate_auth_code] payload: {:?}", payload);
 
     let client_id = payload.client_id.clone();
@@ -51,10 +52,9 @@ impl AuthDataService {
 
     if select_result.is_err() {
       error!("generate_auth_code] select failed: {}", client_id);
-      return Ok(GenerateAuthCodeResponse {
+      return Ok(AuthCodeResponse {
         msg: String::from("no client"),
-        client_id: Some(client_id),
-        auth_code: None,
+        auth_code: String::from(""),
         auth_code_valid_until: None,
       });
     }
@@ -68,18 +68,16 @@ impl AuthDataService {
       .await;
     if update_result.is_err() {
       error!("generate_auth_code] update failed: {}", client_id);
-      return Ok(GenerateAuthCodeResponse {
+      return Ok(AuthCodeResponse {
         msg: String::from("failed to get auth code"),
-        client_id: Some(client_id),
-        auth_code: None,
+        auth_code: String::from(""),
         auth_code_valid_until: None,
       });
     }
 
-    Ok(GenerateAuthCodeResponse {
+    Ok(AuthCodeResponse {
       msg: String::from("success"),
-      client_id: Some(client_id),
-      auth_code: Some(new_auth_code),
+      auth_code: new_auth_code,
       auth_code_valid_until: Some(auth_code_valid_until),
     })
   }
@@ -90,5 +88,20 @@ impl AuthDataService {
 
   fn to_new_auth_code_valid_until(&self) -> DateTime<Utc> {
     Utc::now() + Duration::seconds(AUTH_CODE_LIFETIME)
+  }
+
+  pub async fn generate_token(
+    &self,
+    payload: &web::Json<TokenPayload>,
+  ) -> Result<TokenResponse, &'static str> {
+    debug!("payload: {:?}", payload);
+
+    Ok(TokenResponse {
+      msg: String::from("success"),
+      access_token: String::from("test"),
+      access_token_valid_until: None,
+      refresh_token: String::from("test"),
+      refresh_token_valid_until: None,
+    })
   }
 }

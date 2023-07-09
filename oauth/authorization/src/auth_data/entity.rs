@@ -1,25 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ClientAuthPayload {
-  pub client_id: String,
-  pub client_pass: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct RegisterClientResponse {
-  pub msg: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct GenerateAuthCodeResponse {
-  pub msg: String,
-  pub client_id: Option<String>,
-  pub auth_code: Option<String>,
-  pub auth_code_valid_until: Option<DateTime<Utc>>,
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct AuthData {
   pub id: i32,
