@@ -29,7 +29,7 @@ async fn test_get_id_success() {
 }
 
 async fn spawn_app() {
-  let server = resource::bootstrap::run_server().expect("failed to start server");
+  let server = resource::bootstrap::run_server().await.expect("failed to start server");
 
   let _ = tokio::spawn(server);
 }

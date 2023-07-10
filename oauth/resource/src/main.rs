@@ -10,7 +10,7 @@ async fn main() -> std::io::Result<()> {
 
   info!("resource] main()");
 
-  let _ = run_server()?.await;
+  let _ = run_server().await?.await;
 
   Ok(())
 }
