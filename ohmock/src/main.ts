@@ -5,9 +5,35 @@ export interface Position2D {
   y: number;
 }
 
+export const VERTICAL_LIMIT = 19;
+export const HORIZONTAL_LIMIT = 19;
+
 export interface FieldStatus {
   fields: Fields;
   lastStonePosition?: Position2D;
+}
+
+type FlagType = 'O' | 'X';
+
+export enum LineStatus {
+  INITIAL = 0,
+  TRIPLE,
+  TRIPLE_BLOCKED_LEFT,
+  TRIPLE_BLOCKED_RIGHT,
+  QUAD_BLOCKED_LEFT,
+  QUAD_BLOCKED_RIGHT,
+}
+
+export interface LineStatusSuggestion {
+  status: LineStatus;
+  possiblePosition: Position2D;
+}
+
+type MoveResultType = 'success' | 'fail';
+
+export interface MoveResult {
+  resultType: MoveResultType;
+  resultPos: Position2D;
 }
 
 export const createNewFields = (ySize: number, xSize: number): string[][] => {
@@ -49,7 +75,7 @@ export class Runner implements OmPlayer {
     };
   }
 
-  findConditionHorizontal(fieldStatus: FieldStatus, targetFlag: 'O'|'X'): Position2D | undefined {
+  findConditionHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): Position2D | undefined {
     const fields = fieldStatus.fields;
     const lastPos = fieldStatus.lastStonePosition!;
 
@@ -65,4 +91,46 @@ export class Runner implements OmPlayer {
       y: lastPos.y,
     };
   }
+
+  // findLineStatusHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): LineStatusSuggestion {
+  //   const fields = fieldStatus.fields;
+  //   const lastPos = fieldStatus.lastStonePosition!;
+  // }
+
 }
+
+export const toLeft = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x <= 0) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x-1, y: pos.y },
+  };
+};
+
+export const toRight = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x >= HORIZONTAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x+1, y: pos.y },
+  };
+};
+
+export const toUp = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.y <= 0) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x, y: pos.y-1 },
+  };
+};
+
+export const toDown = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.y >= VERTICAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x, y: pos.y+1 },
+  };
+};
