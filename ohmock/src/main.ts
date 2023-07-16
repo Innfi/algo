@@ -16,12 +16,9 @@ export interface FieldStatus {
 type FlagType = 'O' | 'X';
 
 export enum LineStatus {
-  INITIAL = 0,
-  TRIPLE,
-  TRIPLE_BLOCKED_LEFT,
-  TRIPLE_BLOCKED_RIGHT,
-  QUAD_BLOCKED_LEFT,
-  QUAD_BLOCKED_RIGHT,
+  EMPTY = 0,
+  SAFE,
+  NEED_BLOCK,
 }
 
 export interface LineStatusSuggestion {
@@ -92,11 +89,44 @@ export class Runner implements OmPlayer {
     };
   }
 
-  // findLineStatusHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): LineStatusSuggestion {
-  //   const fields = fieldStatus.fields;
-  //   const lastPos = fieldStatus.lastStonePosition!;
-  // }
+  findLineStatusHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): LineStatusSuggestion {
+    const fields = fieldStatus.fields;
+    const lastPos = fieldStatus.lastStonePosition!;
 
+    let stoneCount = 1;
+    let leftResult: MoveResult;
+    let rightResult: MoveResult;
+
+    while (true) {
+      leftResult = toLeft(lastPos);
+      const { resultType, resultPos } = leftResult;
+      if (resultType !== 'success') break;
+
+      if (fields[resultPos.x][resultPos.y] == targetFlag) stoneCount++;
+      else break;
+    }
+
+    while(true) {
+      rightResult = toRight(lastPos);
+      const { resultType, resultPos } = rightResult;
+      if (resultType !== 'success') break;
+
+      if (fields[resultPos.x][resultPos.y] == targetFlag) stoneCount++;
+      else break;
+    }
+
+    if (stoneCount < 3) {
+      return {
+        status: LineStatus.SAFE,
+        possiblePosition: leftResult.resultPos, //FIXME
+      };
+    }
+
+    return {
+      status: LineStatus.NEED_BLOCK,
+      possiblePosition: leftResult.resultPos, //FIXME
+    };
+  }
 }
 
 export const toLeft = (pos: Readonly<Position2D>): MoveResult => {
@@ -132,5 +162,45 @@ export const toDown = (pos: Readonly<Position2D>): MoveResult => {
   return {
     resultType: 'success',
     resultPos: { x: pos.x, y: pos.y+1 },
+  };
+};
+
+export const toDescUp = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x <= 0) return { resultType: 'fail', resultPos: pos };
+  if (pos.y <= 0) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x-1, y: pos.y-1 },
+  };
+};
+
+export const toDescDown = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x >= HORIZONTAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+  if (pos.y >= VERTICAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x+1, y: pos.y+1 },
+  };
+};
+
+export const toAscUp = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x >= HORIZONTAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+  if (pos.y <= 0) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x+1, y: pos.y-1 },
+  };
+};
+
+export const toAscDown = (pos: Readonly<Position2D>): MoveResult => {
+  if (pos.x <= 0) return { resultType: 'fail', resultPos: pos };
+  if (pos.y >= VERTICAL_LIMIT) return { resultType: 'fail', resultPos: pos };
+
+  return {
+    resultType: 'success',
+    resultPos: { x: pos.x-1, y: pos.y+1 },
   };
 };
