@@ -7,18 +7,20 @@ export interface Position2D {
 
 export const VERTICAL_LIMIT = 19;
 export const HORIZONTAL_LIMIT = 19;
+export const STONE_COUNT_MAX = 5;
 
 export interface FieldStatus {
   fields: Fields;
   lastStonePosition?: Position2D;
 }
 
-type FlagType = 'O' | 'X';
+type FlagType = 'O' | 'X' | '';
 
 export enum LineStatus {
   EMPTY = 0,
   SAFE,
   NEED_BLOCK,
+  INVALID_GAME_STATE,
 }
 
 export interface LineStatusSuggestion {
@@ -89,42 +91,83 @@ export class Runner implements OmPlayer {
     };
   }
 
-  findLineStatusHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): LineStatusSuggestion {
+  getLineStatus(
+    fieldStatus: FieldStatus, 
+    targetFlag: FlagType,
+    forwardFunc: (pos: Readonly<Position2D>) => MoveResult,
+    backwardFunc: (pos: Readonly<Position2D>) => MoveResult,
+  ): LineStatusSuggestion {
     const fields = fieldStatus.fields;
     const lastPos = fieldStatus.lastStonePosition!;
 
     let stoneCount = 1;
-    let leftResult: MoveResult;
-    let rightResult: MoveResult;
+    let leftResult: MoveResult = { resultType: 'success', resultPos: lastPos };
+    let rightResult: MoveResult = { resultType: 'success', resultPos: lastPos };
 
     while (true) {
-      leftResult = toLeft(lastPos);
+      leftResult = forwardFunc(leftResult.resultPos);
       const { resultType, resultPos } = leftResult;
-      if (resultType !== 'success') break;
 
-      if (fields[resultPos.x][resultPos.y] == targetFlag) stoneCount++;
-      else break;
+      if (resultType !== 'success') break;
+      if (stoneCount >= STONE_COUNT_MAX) break;
+      if (fields[resultPos.x][resultPos.y] !== targetFlag) break;
+
+      stoneCount++;
     }
 
     while(true) {
-      rightResult = toRight(lastPos);
+      rightResult = backwardFunc(rightResult.resultPos);
       const { resultType, resultPos } = rightResult;
-      if (resultType !== 'success') break;
 
-      if (fields[resultPos.x][resultPos.y] == targetFlag) stoneCount++;
-      else break;
+      if (resultType !== 'success') break;
+      if (stoneCount >= STONE_COUNT_MAX) break;
+      if (fields[resultPos.x][resultPos.y] !== targetFlag) break;
+
+      stoneCount++;
     }
 
-    if (stoneCount < 3) {
+    return this.toLineStatusSuggestion(
+      fieldStatus.fields, 
+      targetFlag, 
+      stoneCount, 
+      leftResult, 
+      rightResult,
+    );
+  }
+
+  private toLineStatusSuggestion(
+    fields: Fields,
+    targetFlag: FlagType,
+    stoneCount: number, 
+    leftResult: MoveResult, 
+    rightResult: MoveResult
+  ): LineStatusSuggestion {
+    const myFlag: FlagType = targetFlag === 'O' ? 'X' : 'O';
+
+    if (stoneCount >= STONE_COUNT_MAX) {
       return {
-        status: LineStatus.SAFE,
-        possiblePosition: leftResult.resultPos, //FIXME
+        status: LineStatus.INVALID_GAME_STATE,
+        possiblePosition: leftResult.resultPos,
+      };
+    }
+
+    if (fields[leftResult.resultPos.x][leftResult.resultPos.y] !== myFlag) {
+      return {
+        status: LineStatus.NEED_BLOCK,
+        possiblePosition: leftResult.resultPos,
+      };
+    }
+
+    if (fields[rightResult.resultPos.x][rightResult.resultPos.y] !== myFlag) {
+      return {
+        status: LineStatus.NEED_BLOCK,
+        possiblePosition: rightResult.resultPos,
       };
     }
 
     return {
-      status: LineStatus.NEED_BLOCK,
-      possiblePosition: leftResult.resultPos, //FIXME
+      status: LineStatus.SAFE,
+      possiblePosition: leftResult.resultPos,
     };
   }
 }
