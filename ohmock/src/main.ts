@@ -47,6 +47,8 @@ export const createNewFields = (ySize: number, xSize: number): string[][] => {
   return result;
 };
 
+export type PivotFunction = (pos: Readonly<Position2D>) => MoveResult;
+
 export interface OmPlayer {
   getDescription(): { nickname: string; tactics: string; };
 
@@ -68,10 +70,29 @@ export class Runner implements OmPlayer {
     fieldStatus: FieldStatus,
     yourFlag: "O" | "X",
   ): Promise<Position2D> {
-    return {
-      x: 1,
-      y: 1,
-    };
+    const pivotPairs: { forwardFunc: PivotFunction; backwardFunc: PivotFunction }[] = [
+      { forwardFunc: toLeft, backwardFunc: toRight },
+      { forwardFunc: toUp, backwardFunc: toDown },
+      { forwardFunc: toDescUp, backwardFunc: toDescDown },
+      { forwardFunc: toAscUp, backwardFunc: toDescDown },
+    ];
+
+    const targetFlag = yourFlag === 'O' ? 'X' : 'O';
+
+    for (const { forwardFunc, backwardFunc } of pivotPairs) {
+      const lineStatus = this.getLineStatus(
+        fieldStatus, 
+        targetFlag, 
+        forwardFunc, 
+        backwardFunc
+      );
+
+      if (lineStatus.status === LineStatus.NEED_BLOCK) {
+        return lineStatus.possiblePosition;
+      }
+    }
+
+    return this.toRandomPosition(fieldStatus, yourFlag);
   }
 
   findConditionHorizontal(fieldStatus: FieldStatus, targetFlag: FlagType): Position2D | undefined {
@@ -94,8 +115,8 @@ export class Runner implements OmPlayer {
   getLineStatus(
     fieldStatus: FieldStatus, 
     targetFlag: FlagType,
-    forwardFunc: (pos: Readonly<Position2D>) => MoveResult,
-    backwardFunc: (pos: Readonly<Position2D>) => MoveResult,
+    forwardFunc: PivotFunction,
+    backwardFunc: PivotFunction,
   ): LineStatusSuggestion {
     const fields = fieldStatus.fields;
     const lastPos = fieldStatus.lastStonePosition!;
@@ -168,6 +189,13 @@ export class Runner implements OmPlayer {
     return {
       status: LineStatus.SAFE,
       possiblePosition: leftResult.resultPos,
+    };
+  }
+
+  private toRandomPosition(fieldStatus: FieldStatus, yourFlag: FlagType): Position2D {
+    return {
+      x: 1,
+      y: 1,
     };
   }
 }
