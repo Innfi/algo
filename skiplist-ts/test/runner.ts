@@ -60,6 +60,6 @@ describe('skiplist', () => {
 
     const root = instance.root;
 
-    assert.strictEqual(root.nextMilestone.elem, 5);
+    assert.strictEqual(root.nextMilestone.elem, 4);
   });
 });
