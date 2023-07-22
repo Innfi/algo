@@ -63,3 +63,41 @@ describe('skiplist', () => {
     assert.strictEqual(root.nextMilestone.elem, 4);
   });
 });
+
+const randomSeed = (): number => {
+  return Math.floor(Math.random() * 10)+1;
+};
+
+describe('skiplist: preset', () => {
+  it('check basic property of the linked list', () => {
+    const instance = new SkipList();
+    const len = 10;
+    let seed = 1;
+
+    for(let i=0;i<len;i++) {
+      seed += randomSeed();
+
+      instance.insertSimple(seed);
+    }
+
+    let root = instance.root;
+    while(root.next != undefined) {
+      assert.strictEqual(root.elem < root.next.elem, true);
+      root = root.next;
+    }
+  });
+  
+  it('preset: 1mil nodes', () => {
+    const instance = new SkipList();
+    const len = 1000000;
+    let seed = 1;
+
+    for(let i=0;i<len;i++) {
+      seed += randomSeed();
+
+      instance.insertSimple(seed);
+    }
+
+    instance.createLevelPreset();
+  });
+});
