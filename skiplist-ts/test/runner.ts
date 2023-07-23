@@ -5,15 +5,13 @@ import { SkipList } from '../src/main';
 /*
 TODO
 --------------------------------------------------------------------------------
-add a milstone in the middle
-add more milestones with a binary fashion
-change elements of the list
-change milestones according to pivots
-
+add node to skiplist
+delete node from skiplist
 
 DONE
 --------------------------------------------------------------------------------
 start with a simple double linked list
+add more milestones with a binary fashion
 */
 
 describe('skiplist', () => {
@@ -52,20 +50,25 @@ describe('skiplist', () => {
     assert.strictEqual(instance.root.next.next.elem, 3);
     assert.strictEqual(instance.root.next.next.prev.elem, 2);
   });
-
-  it('insert] set milestone', () => {
-    const instance = new SkipList();
-
-    instance.insertBulk([1,2,3,4,5,6,7,8,9]);
-
-    const root = instance.root;
-
-    assert.strictEqual(root.nextMilestone.elem, 4);
-  });
 });
 
 const randomSeed = (): number => {
   return Math.floor(Math.random() * 10)+1;
+};
+
+const createPreset = (len: number): SkipList => {
+  const instance = new SkipList();
+  let seed = 1;
+
+  for(let i=0;i<len;i++) {
+    seed += randomSeed();
+
+    instance.insertSimple(seed);
+  }
+
+  instance.createLevelPreset();
+
+  return instance;
 };
 
 describe('skiplist: preset', () => {
@@ -87,17 +90,11 @@ describe('skiplist: preset', () => {
     }
   });
   
-  it('preset: 1mil nodes', () => {
-    const instance = new SkipList();
-    const len = 1000000;
-    let seed = 1;
+  it('search node via levels', () => {
+    const instance: SkipList = createPreset(100);
 
-    for(let i=0;i<len;i++) {
-      seed += randomSeed();
+    const findResult = instance.find(50);
 
-      instance.insertSimple(seed);
-    }
-
-    instance.createLevelPreset();
+    assert.strictEqual(findResult !== undefined, true);
   });
 });

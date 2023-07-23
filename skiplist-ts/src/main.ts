@@ -1,4 +1,4 @@
-export const LEVEL_MAX = 4;
+export const LEVEL_MAX = 5;
 
 type LevelType = DoubleNode | undefined;
 
@@ -6,8 +6,6 @@ export class DoubleNode {
   elem: number;
   prev: DoubleNode;
   next: DoubleNode;
-
-  nextMilestone: DoubleNode;
 
   level: LevelType[];
 
@@ -19,6 +17,11 @@ export class DoubleNode {
   }
 }
 
+export interface FindResult {
+  err: 'success' | 'fail';
+  targetNode: DoubleNode | undefined;
+}
+
 export class SkipList {
   root: DoubleNode;
   current: DoubleNode;
@@ -26,58 +29,6 @@ export class SkipList {
 
   constructor() {
     this.len = 0;
-  }
-
-  insertSimple(elem: number): void {
-    const newNode = new DoubleNode(elem);
-
-    if (!this.root) {
-      this.root = newNode;
-      this.current = newNode;
-      this.len += 1;
-      return;
-    }
-
-    this.current.next = newNode;
-    newNode.prev = this.current;
-
-    this.current = this.current.next;
-    this.len += 1;
-  }
-
-  createLevelPreset(): void {
-    console.log(`createLevelPreset] max: ${LEVEL_MAX}, elem len: ${this.len}`);
-
-    for(let current = 0;current < LEVEL_MAX;current++) {
-      this.createLevelByIndex(current);
-      console.log('-----------------------------');
-    }
-  }
-
-  createLevelByIndex(index: number) {
-    const span = Math.floor(this.len / Math.pow(2, index+1));
-    console.log(`createLevelByIndex] index: ${index}, span: ${span}`);
-
-    let currentNode = this.root;
-    let nextNode = this.root;
-    let currentLevelLen = 0;
-    let currentSpan = span;
-
-    while (true) {
-      if (currentSpan >= this.len) break;
-
-      while (currentLevelLen < currentSpan) {
-        nextNode = nextNode.next;
-        currentLevelLen += 1;
-      }
-      console.log(`createLevelByIndex] currentLevelLen: ${currentLevelLen}, currentSpan: ${currentSpan}`);
-
-      currentNode.level[index] = nextNode;
-      console.log(`createLevelByIndex] index: ${index}, currentNode: ${currentNode.elem}, nextNode: ${nextNode.elem}`);
-
-      currentNode = nextNode;
-      currentSpan += span;
-    }
   }
 
   insert(elem: number): void {
@@ -99,21 +50,73 @@ export class SkipList {
     this.len += 1;
   }
 
-  insertBulk(elems: number[]): void {
-    elems.forEach((elem: number) => { this.insert(elem) });
+  insertSimple(elem: number): void {
+    const newNode = new DoubleNode(elem);
 
-    this.linkMilestone(Math.floor(this.len/2));
-  }
-
-  private linkMilestone(offset: number): void {
-    let currentIndex = 0;
-    let currentNode = this.root;
-
-    while (currentIndex < offset-1) {
-      currentNode = currentNode.next;
-      currentIndex += 1;
+    if (!this.root) {
+      this.root = newNode;
+      this.current = newNode;
+      this.len += 1;
+      return;
     }
 
-    this.root.nextMilestone = currentNode;
+    this.current.next = newNode;
+    newNode.prev = this.current;
+
+    this.current = this.current.next;
+    this.len += 1;
+  }
+
+  createLevelPreset(): void {
+    for(let current = 0;current < LEVEL_MAX;current++) {
+      this.createLevelByIndex(current);
+    }
+  }
+
+  private createLevelByIndex(index: number) {
+    const span = Math.floor(this.len / Math.pow(2, index+1));
+
+    let currentNode = this.root;
+    let nextNode = this.root;
+    let currentLevelLen = 0;
+    let currentSpan = span;
+
+    while (true) {
+      if (currentSpan >= this.len) break;
+
+      while (currentLevelLen < currentSpan) {
+        nextNode = nextNode.next;
+        currentLevelLen += 1;
+      }
+
+      currentNode.level[index] = nextNode;
+
+      currentNode = nextNode;
+      currentSpan += span;
+    }
+  }
+
+  find(elem: number): FindResult {
+    let current = this.root;
+
+    while(true) {
+      if (!current) return { err: 'fail', targetNode: undefined };
+      if (current.elem > elem) return { err: 'fail', targetNode: undefined };
+      if (current.elem === elem) break;
+
+      let index = 0;
+      for (index;index<LEVEL_MAX;index++) {
+        if (!current.level[index]) continue;
+        if (current.level[index]!.elem > elem) continue;
+
+        current = current.level[index]!;
+
+        break;
+      }
+
+      if (index >= LEVEL_MAX) current = current.next;
+    }
+
+    return { err: 'success', targetNode: current };
   }
 }
