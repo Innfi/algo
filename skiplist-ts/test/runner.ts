@@ -97,4 +97,20 @@ describe('skiplist: preset', () => {
 
     assert.strictEqual(findResult !== undefined, true);
   });
+
+  it('performance test', () => {
+    const instance: SkipList = createPreset(100000);
+
+    const last = instance.current.elem;
+
+    for (let i=0;i<50000;i++) {
+      const targetNumber = Math.floor(last * Math.random());
+
+      console.log(`start: ${new Date().getMilliseconds()}`);
+
+      instance.find(targetNumber);
+
+      console.log(`end: ${new Date().getMilliseconds()}`);
+    }
+  });
 });
