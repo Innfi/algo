@@ -18,7 +18,7 @@ export class DoubleNode {
 }
 
 export interface FindResult {
-  err: 'success' | 'fail';
+  err: 'match' | 'next' | 'fail';
   targetNode: DoubleNode | undefined;
 }
 
@@ -31,33 +31,14 @@ export class SkipList {
     this.len = 0;
   }
 
-  insert(elem: number): void {
-    const newNode = new DoubleNode(elem);
-
-    if (!this.root) {
-      this.root = newNode;
-      this.len += 1;
-      return;
-    }
-
-    let current = this.root;
-    while (current.next) {
-      current = current.next;
-    }
-
-    current.next = newNode;
-    newNode.prev = current;
-    this.len += 1;
-  }
-
-  insertSimple(elem: number): void {
+  pushBack(elem: number): number {
     const newNode = new DoubleNode(elem);
 
     if (!this.root) {
       this.root = newNode;
       this.current = newNode;
       this.len += 1;
-      return;
+      return this.len;
     }
 
     this.current.next = newNode;
@@ -65,6 +46,28 @@ export class SkipList {
 
     this.current = this.current.next;
     this.len += 1;
+
+    return this.len;
+  }
+
+  insert(elem: number): number {
+    const findResult = this.find(elem);
+    if (findResult.err === 'fail') return this.pushBack(elem);
+    if (findResult.err === 'match') return this.len;
+
+    const targetNode = findResult.targetNode!;
+    const nextNode = targetNode.next;
+    const newNode = new DoubleNode(elem);
+
+    targetNode.next = newNode;
+    newNode.prev = targetNode;
+
+    newNode.next = nextNode;
+    nextNode.prev = newNode;
+
+    this.len += 1;
+
+    return this.len;
   }
 
   createLevelPreset(): void {
@@ -114,9 +117,13 @@ export class SkipList {
         break;
       }
 
+      if (current.elem < elem && elem < current.next.elem) {
+        return { err: 'next', targetNode: current };
+      }
+
       if (index >= LEVEL_MAX) current = current.next;
     }
 
-    return { err: 'success', targetNode: current };
+    return { err: 'match', targetNode: current };
   }
 }

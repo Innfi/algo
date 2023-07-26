@@ -24,7 +24,7 @@ describe('skiplist', () => {
   it('insert] first node', () => {
     const instance = new SkipList();
 
-    instance.insert(1);
+    instance.pushBack(1);
 
     assert.strictEqual(instance.root.elem, 1);
   });
@@ -32,8 +32,8 @@ describe('skiplist', () => {
   it('insert] second node', () => {
     const instance = new SkipList();
 
-    instance.insert(1);
-    instance.insert(2);
+    instance.pushBack(1);
+    instance.pushBack(2);
 
     assert.strictEqual(instance.root.next.elem, 2);
     assert.strictEqual(instance.root.next.prev.elem, 1);
@@ -42,9 +42,9 @@ describe('skiplist', () => {
   it('insert] third node', () => {
     const instance = new SkipList();
 
-    instance.insert(1);
-    instance.insert(2);
-    instance.insert(3);
+    instance.pushBack(1);
+    instance.pushBack(2);
+    instance.pushBack(3);
 
     assert.strictEqual(instance.root.elem, 1);
     assert.strictEqual(instance.root.next.next.elem, 3);
@@ -63,7 +63,7 @@ const createPreset = (len: number): SkipList => {
   for(let i=0;i<len;i++) {
     seed += randomSeed();
 
-    instance.insertSimple(seed);
+    instance.pushBack(seed);
   }
 
   instance.createLevelPreset();
@@ -80,7 +80,7 @@ describe('skiplist: preset', () => {
     for(let i=0;i<len;i++) {
       seed += randomSeed();
 
-      instance.insertSimple(seed);
+      instance.pushBack(seed);
     }
 
     let root = instance.root;
