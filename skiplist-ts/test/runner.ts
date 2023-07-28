@@ -5,13 +5,13 @@ import { SkipList } from '../src/main';
 /*
 TODO
 --------------------------------------------------------------------------------
-add node to skiplist
 delete node from skiplist
 
 DONE
 --------------------------------------------------------------------------------
 start with a simple double linked list
 add more milestones with a binary fashion
+add node to skiplist
 */
 
 describe('skiplist', () => {

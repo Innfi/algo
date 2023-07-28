@@ -31,6 +31,7 @@ export class SkipList {
     this.len = 0;
   }
 
+  // pushBack
   pushBack(elem: number): number {
     const newNode = new DoubleNode(elem);
 
@@ -50,6 +51,7 @@ export class SkipList {
     return this.len;
   }
 
+  // insert
   insert(elem: number): number {
     const findResult = this.find(elem);
     if (findResult.err === 'fail') return this.pushBack(elem);
@@ -70,6 +72,7 @@ export class SkipList {
     return this.len;
   }
 
+  // createLevelPreset
   createLevelPreset(): void {
     for(let current = 0;current < LEVEL_MAX;current++) {
       this.createLevelByIndex(current);
@@ -99,6 +102,7 @@ export class SkipList {
     }
   }
 
+  // find
   find(elem: number): FindResult {
     let current = this.root;
 
@@ -125,5 +129,45 @@ export class SkipList {
     }
 
     return { err: 'match', targetNode: current };
+  }
+
+  // deleteElem
+  deleteElem(elem: number): number {
+    let current = this.root;
+
+    //FIXME: root.elem === elem
+
+    for (let i=0;i<current.level.length;i++) {
+      this.tryDeleteLevel(current.level[i], i, elem);
+    }
+
+    while(current.next) {
+      if (current.next.elem === elem) break;
+
+      current = current.next;
+    }
+
+    if (!current.next) return this.len;
+
+    current.next = current.next.next;
+    this.len -= 1;   
+
+    return this.len;
+  }
+
+  private tryDeleteLevel(level: LevelType, index: number, elem: number): void {
+    if (!level) return;
+
+    let current = level!;
+    while(current.level[index]) {
+      if (current.level[index]!.elem === elem) break;
+
+      current = current.level[index]!;
+    }
+
+    if (!current.level[index]) return;
+
+    current.level[index] = current.level[index]!.level[index];
+    return;
   }
 }
