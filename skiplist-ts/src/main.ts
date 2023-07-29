@@ -1,5 +1,3 @@
-export const LEVEL_MAX = 5;
-
 type LevelType = DoubleNode | undefined;
 
 export class DoubleNode {
@@ -9,11 +7,11 @@ export class DoubleNode {
 
   level: LevelType[];
 
-  constructor(elem: number) {
+  constructor(elem: number, levelMax: number) {
     this.elem = elem;
     this.level = [];
 
-    for(let i=0;i<LEVEL_MAX;i++) this.level.push(undefined);
+    for(let i=0;i<levelMax;i++) this.level.push(undefined);
   }
 }
 
@@ -26,14 +24,16 @@ export class SkipList {
   root: DoubleNode;
   current: DoubleNode;
   len: number;
+  levelMax: number;
 
-  constructor() {
+  constructor(levelMax: number = 4) {
     this.len = 0;
+    this.levelMax = levelMax;
   }
 
   // pushBack
   pushBack(elem: number): number {
-    const newNode = new DoubleNode(elem);
+    const newNode = new DoubleNode(elem, this.levelMax);
 
     if (!this.root) {
       this.root = newNode;
@@ -59,7 +59,7 @@ export class SkipList {
 
     const targetNode = findResult.targetNode!;
     const nextNode = targetNode.next;
-    const newNode = new DoubleNode(elem);
+    const newNode = new DoubleNode(elem, this.levelMax);
 
     targetNode.next = newNode;
     newNode.prev = targetNode;
@@ -74,7 +74,7 @@ export class SkipList {
 
   // createLevelPreset
   createLevelPreset(): void {
-    for(let current = 0;current < LEVEL_MAX;current++) {
+    for(let current = 0;current < this.levelMax;current++) {
       this.createLevelByIndex(current);
     }
   }
@@ -112,7 +112,7 @@ export class SkipList {
       if (current.elem === elem) break;
 
       let index = 0;
-      for (index;index<LEVEL_MAX;index++) {
+      for (index;index<this.levelMax;index++) {
         if (!current.level[index]) continue;
         if (current.level[index]!.elem > elem) continue;
 
@@ -125,7 +125,7 @@ export class SkipList {
         return { err: 'next', targetNode: current };
       }
 
-      if (index >= LEVEL_MAX) current = current.next;
+      if (index >= this.levelMax) current = current.next;
     }
 
     return { err: 'match', targetNode: current };
