@@ -133,9 +133,9 @@ export class SkipList {
 
   // deleteElem
   deleteElem(elem: number): number {
-    let current = this.root;
+    if (this.root.elem === elem) return this.deleteRoot();
 
-    //FIXME: root.elem === elem
+    let current = this.root;
 
     for (let i=0;i<current.level.length;i++) {
       this.tryDeleteLevel(current.level[i], i, elem);
@@ -153,6 +153,17 @@ export class SkipList {
     this.len -= 1;   
 
     return this.len;
+  }
+
+  private deleteRoot(): number {
+    const root = this.root;
+    const newRoot = root.next;
+
+    for (let i=0;i<root.level.length;i++) newRoot.level[i] = root.level[i];
+
+    this.root = newRoot;
+
+    return this.len-1;
   }
 
   private tryDeleteLevel(level: LevelType, index: number, elem: number): void {
