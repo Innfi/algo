@@ -2,18 +2,6 @@ import assert from 'assert';
 
 import { SkipList } from '../src/main';
 
-/*
-TODO
---------------------------------------------------------------------------------
-delete node from skiplist
-
-DONE
---------------------------------------------------------------------------------
-start with a simple double linked list
-add more milestones with a binary fashion
-add node to skiplist
-*/
-
 describe('skiplist', () => {
   it('initial condition: root is empty', () => {
     const instance = new SkipList();
