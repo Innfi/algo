@@ -1,11 +1,14 @@
 export class Node {
   elem: number;
   forward: (Node | undefined)[];
+  span: number;
 
   constructor(elem: number, level: number) {
     this.elem = elem;
 
-    this.forward = new Array(level=1).fill(undefined);
+    this.forward = new Array(level+1).fill(undefined);
+
+    this.span = 0;
   }
 }
 
@@ -14,10 +17,12 @@ const LEVEL_PROB = 0.25;
 
 export class SkipList {
   root: Node;
+  rootSpan: number[];
   level: number;
 
   constructor() {
     this.root = new Node(-1, MAX_LEVEL);
+    this.rootSpan = new Array(MAX_LEVEL).fill(0);
     this.level = 0;
   }
 
@@ -50,6 +55,12 @@ export class SkipList {
 
     for (let i=0;i<=rLevel;i++) {
       newNode.forward[i] = update[i].forward[i];
+
+      if (newNode.forward[i]) newNode.span = 1;
+      if (update[i].elem === this.root.elem) this.rootSpan[i] += 1;
+
+      if (!update[i].forward[i]) update[i]!.span = 1;
+
       update[i].forward[i] = newNode;
     }
   }
