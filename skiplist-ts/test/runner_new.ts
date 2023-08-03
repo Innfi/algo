@@ -46,4 +46,22 @@ describe('skiplist_new', () => {
     assert.strictEqual(instance.root.forward[0]?.span, 1);
     assert.strictEqual(instance.root.forward[0]?.forward[0]?.span, 0);
   });
+
+  it('span] tests when level expands', () => {
+    const instance = new SkipList();
+
+    let elem = 1;
+    while (elem < 100) {
+      instance.insert(elem);
+
+      if (instance.root.forward[1]) break;
+
+      elem++;
+    }
+
+    instance.display();
+    // console.log(`forward[1]: ${instance.root.forward[1]?.span}`);
+
+    assert.strictEqual(instance.root.forward[1]!.span > 1, true);
+  });
 });
