@@ -1,14 +1,13 @@
 export class Node {
   elem: number;
   forward: (Node | undefined)[];
-  span: number;
+  span: number[];
 
   constructor(elem: number, level: number) {
     this.elem = elem;
 
     this.forward = new Array(level+1).fill(undefined);
-
-    this.span = 0;
+    this.span = new Array(level+1).fill(0);
   }
 }
 
@@ -17,12 +16,10 @@ const LEVEL_PROB = 0.25;
 
 export class SkipList {
   root: Node;
-  rootSpan: number[];
   level: number;
 
   constructor() {
     this.root = new Node(-1, MAX_LEVEL);
-    this.rootSpan = new Array(MAX_LEVEL).fill(0);
     this.level = 0;
   }
 
@@ -32,36 +29,49 @@ export class SkipList {
 
     let update = new Array(MAX_LEVEL+1).fill(undefined);
 
+    const rLevel = this.randomLevel();
+    const newNode = new Node(elem, rLevel);
+
     for (let i = this.level; i >= 0;i--) {
+      let spanSum = 0;
+
       while(current.forward[i] && current.forward[i]!.elem < elem) {
+        spanSum += current.span[i];
         current = current.forward[i]!;
       }
 
       update[i] = current;
+
+      if (i < this.level -1) newNode.span[i+1] = spanSum;
     }
+
+    newNode.span[0] = 1;
 
     current = current.forward[0]!;
 
     if (current && current.elem === elem) return;
 
-    const rLevel = this.randomLevel();
     if (rLevel > this.level) {
       for (let i = this.level+1; i<rLevel+1;i++) update[i] = this.root;
 
       this.level = rLevel;
     }
 
-    const newNode = new Node(elem, rLevel);
-
+    let spanSum = 0;
     for (let i=0;i<=rLevel;i++) {
+      const current = update[i];
+
       newNode.forward[i] = update[i].forward[i];
-
-      if (newNode.forward[i]) newNode.span = 1;
-      if (update[i].elem === this.root.elem) this.rootSpan[i] += 1;
-
-      if (!update[i].forward[i]) update[i]!.span = 1;
-
       update[i].forward[i] = newNode;
+
+      let oldSpan = current.span[i];
+      let newNodeSpan = newNode.span[i];
+
+      spanSum += newNodeSpan;
+      let newSpan = oldSpan - spanSum;
+
+      current.span[i] = spanSum;
+      newNode.span[i] = newSpan < 0 ? 0 : newSpan;
     }
   }
 
