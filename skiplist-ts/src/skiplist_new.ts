@@ -42,11 +42,12 @@ export class SkipList {
 
       update[i] = current;
 
-      if (i < this.level -1) newNode.span[i+1] = spanSum;
+      if (i < this.level -1) {
+        newNode.span[i] = spanSum;
+      }
     }
 
     newNode.span[0] = 1;
-
     current = current.forward[0]!;
 
     if (current && current.elem === elem) return;
@@ -59,18 +60,18 @@ export class SkipList {
 
     let spanSum = 0;
     for (let i=0;i<=rLevel;i++) {
-      const current = update[i];
+      const currentUpdate = update[i];
 
       newNode.forward[i] = update[i].forward[i];
       update[i].forward[i] = newNode;
 
-      let oldSpan = current.span[i];
+      let oldSpan = currentUpdate.span[i];
       let newNodeSpan = newNode.span[i];
 
       spanSum += newNodeSpan;
       let newSpan = oldSpan - spanSum;
 
-      current.span[i] = spanSum;
+      currentUpdate.span[i] = spanSum;
       newNode.span[i] = newSpan < 0 ? 0 : newSpan;
     }
   }
@@ -124,5 +125,34 @@ export class SkipList {
       }
       console.log('\n');
     }
+  }
+
+  // rank
+  rank(elem: number): number {
+    let current = this.root;
+    let rank = 0;
+
+    while (current) {
+      if (current.elem === elem) return rank;
+
+      let i = MAX_LEVEL;
+      for (i;i>=0;i--) {
+        if (!current.forward[i]) continue;
+
+        if (i === 0 && 
+          current.elem < elem && 
+          current.forward[0]!.elem > elem) return 0;
+
+        if (elem >= current.forward[i]!.elem) {
+          current = current.forward[i]!;
+          rank += current.span[i];
+          break;
+        }
+      }
+
+      if (current === this.root) return 0;
+    }
+
+    return rank;
   }
 }
