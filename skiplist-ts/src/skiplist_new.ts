@@ -42,9 +42,10 @@ export class SkipList {
 
       update[i] = current;
 
-      if (i < this.level -1) {
+      //if (i < this.level -1) {
         newNode.span[i] = spanSum;
-      }
+      console.log(`elem: ${elem}, spanSum: ${spanSum}`);
+      //}
     }
 
     newNode.span[0] = 1;
@@ -70,6 +71,11 @@ export class SkipList {
 
       spanSum += newNodeSpan;
       let newSpan = oldSpan - spanSum;
+      console.log(`---------- level: ${i}`);
+      console.log(`newNode: ${newNode.elem}`);
+      console.log(`currentUpdate: ${currentUpdate.elem}`);
+      console.log(`newNodeSpan: ${newNodeSpan} spanSum: ${spanSum}, oldSpan: ${oldSpan}`);
+      console.log('----------');
 
       currentUpdate.span[i] = spanSum;
       newNode.span[i] = newSpan < 0 ? 0 : newSpan;
