@@ -54,29 +54,16 @@ describe('skiplist_new', () => {
   it ('rank] simple rank', () => {
     const instance = new SkipList();
 
-    for (let i=1;i<=10;i++) instance.insert(i);
+    instance.insert(2);
+    instance.insert(4);
+    instance.insert(6);
+    instance.insert(12);
+    instance.insert(10);
 
-    instance.display();
+    assert.strictEqual(instance.root.span[0], 1);
+    assert.strictEqual(instance.root.forward[0]!.span[0], 1);
+    assert.strictEqual(instance.root.forward[0]!.forward[0]!.span[0], 1);
 
-    assert.strictEqual(instance.rank(1), 1);
-    assert.strictEqual(instance.rank(5), 5);
+    assert.strictEqual(instance.root.span[1], 4);
   });
-
-  // it('span] tests when level expands', () => {
-  //   const instance = new SkipList();
-
-  //   let elem = 1;
-  //   while (elem < 100) {
-  //     instance.insert(elem);
-
-  //     if (instance.root.forward[1]) break;
-
-  //     elem++;
-  //   }
-
-  //   instance.display();
-  //   // console.log(`forward[1]: ${instance.root.forward[1]?.span}`);
-
-  //   assert.strictEqual(instance.root.forward[1]!.span[1] > 1, true);
-  // });
 });

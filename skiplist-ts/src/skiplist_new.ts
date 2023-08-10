@@ -26,15 +26,12 @@ export class SkipList {
   // insert
   insert(elem: number): void {
     let current = this.root;
-
     let update = new Array(MAX_LEVEL+1).fill(undefined);
-
     const rLevel = this.randomLevel();
     const newNode = new Node(elem, rLevel);
 
     for (let i = this.level; i >= 0;i--) {
       let spanSum = 0;
-
       while(current.forward[i] && current.forward[i]!.elem < elem) {
         spanSum += current.span[i];
         current = current.forward[i]!;
@@ -42,10 +39,7 @@ export class SkipList {
 
       update[i] = current;
 
-      //if (i < this.level -1) {
-        newNode.span[i] = spanSum;
-      console.log(`elem: ${elem}, spanSum: ${spanSum}`);
-      //}
+      if (i < MAX_LEVEL-1) newNode.span[i+1] = spanSum;
     }
 
     newNode.span[0] = 1;
@@ -66,18 +60,14 @@ export class SkipList {
       newNode.forward[i] = update[i].forward[i];
       update[i].forward[i] = newNode;
 
-      let oldSpan = currentUpdate.span[i];
-      let newNodeSpan = newNode.span[i];
+      const oldSpan = currentUpdate.span[i];
+      const newNodeSpan = newNode.span[i];
 
       spanSum += newNodeSpan;
-      let newSpan = oldSpan - spanSum;
-      console.log(`---------- level: ${i}`);
-      console.log(`newNode: ${newNode.elem}`);
-      console.log(`currentUpdate: ${currentUpdate.elem}`);
-      console.log(`newNodeSpan: ${newNodeSpan} spanSum: ${spanSum}, oldSpan: ${oldSpan}`);
-      console.log('----------');
 
       currentUpdate.span[i] = spanSum;
+      const newSpan = oldSpan - spanSum;
+
       newNode.span[i] = newSpan < 0 ? 0 : newSpan;
     }
   }
