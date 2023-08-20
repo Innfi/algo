@@ -3,6 +3,9 @@ package skiplist_test
 import (
 	"testing"
 
+	"math/rand"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,4 +63,15 @@ func TestSkipListInitial(t *testing.T) {
 
 	assert.Equal(t, root.elem, -1)
 	assert.Equal(t, len(root.forward), root.levelMax)
+}
+
+func TestRandom(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < 1000; i++ {
+		result := rand.Intn(8)
+
+		assert.Equal(t, result >= 0, true)
+		assert.Equal(t, result < 8, true)
+	}
 }
