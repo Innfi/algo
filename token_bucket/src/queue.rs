@@ -12,4 +12,12 @@ impl BucketQueue {
       queue: ConcurrentQueue::bounded(5),
     }
   }
+
+  pub fn push(&self, new_token: RequestToken) -> Result<(), &'static str> {
+    // naive approach: toss and forget
+
+    self.queue.push(new_token).unwrap();
+
+    return Ok(());
+  }
 }
