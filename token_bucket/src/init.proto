@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package token_bucket;
+package token_bucket.contract;
 
 service TokenProvider {
   rpc BookToken (BookingRequest) returns (BookingResponse);
