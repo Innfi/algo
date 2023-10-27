@@ -1,12 +1,8 @@
-extern crate prost_build;
-
+use tonic_build::compile_protos;
 use std::io::Result;
 
 fn main() -> Result<()> {
-  prost_build::compile_protos(
-    &["src/init.proto"],
-    &["src/"]
-  ).unwrap();
+  compile_protos("src/contract.proto")?;
 
   Ok(())
 }
