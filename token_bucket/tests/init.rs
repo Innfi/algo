@@ -1,4 +1,4 @@
-use token_bucket::token::RequestToken;
+use token_bucket::bucket_impl::RequestToken;
 
 #[test]
 fn test_initial() {

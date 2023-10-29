@@ -1,12 +1,15 @@
 use concurrent_queue::ConcurrentQueue;
 
-use crate::token::RequestToken;
+use crate::bucket_impl::RequestToken;
+
+const QUEUE_LEN: usize = 100;
 
 pub trait TokenBucket {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str>;
   fn issue(&self) -> Result<RequestToken, &'static str>;
 }
 
+#[derive(Debug)]
 pub struct BucketQueue {
   queue: ConcurrentQueue<RequestToken>, 
 }
@@ -14,7 +17,7 @@ pub struct BucketQueue {
 impl BucketQueue {
   pub fn new() -> Self {
     Self {
-      queue: ConcurrentQueue::bounded(5),
+      queue: ConcurrentQueue::bounded(QUEUE_LEN),
     }
   }
 }
@@ -22,6 +25,7 @@ impl BucketQueue {
 impl TokenBucket for BucketQueue {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str> {
     // naive approach: toss and forget
+    log::debug!("new token: {}", new_token.id);
 
     self.queue.push(new_token).unwrap();
 
@@ -29,6 +33,8 @@ impl TokenBucket for BucketQueue {
   }
   
   fn issue(&self) -> Result<RequestToken, &'static str> {
-    todo!();
+    let token = self.queue.pop().unwrap();
+
+    Ok(token)
   }
 }
