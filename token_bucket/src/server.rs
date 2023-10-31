@@ -3,7 +3,7 @@ use tonic::{transport::Server, Request, Response, Status};
 
 use contract::token_provider_server::{TokenProvider, TokenProviderServer};
 use contract::{BookingRequest, BookingResponse};
-use token_bucket::bucket_impl::{BucketQueue, RequestToken, TokenBucket, TokenGenerator};
+use token_bucket::bucket_impl::{BucketQueue, TokenBucket, TokenGenerator};
 
 pub mod contract {
   tonic::include_proto!("contract");
@@ -30,7 +30,15 @@ impl TokenProvider for ContractStruct {
   ) -> Result<Response<BookingResponse>, Status> {
     println!("request: {:?}", request);
 
-    let token = self.bucket_queue.as_ref().unwrap().issue().unwrap();
+    let queue = self.bucket_queue.as_ref().unwrap();
+    if queue.len() <= 0 {
+      return Err(Status::new(
+        tonic::Code::Unavailable, 
+        String::from("unavailable"),
+      ));
+    }
+
+    let token = queue.issue().unwrap();
 
     Ok(Response::new(BookingResponse {
       token: token.id,
@@ -44,18 +52,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   let bucket_queue = Arc::new(BucketQueue::new());
 
-  let generator = TokenGenerator::new(&bucket_queue);
   let mut service = ContractStruct::default();
+  service.bucket_queue = Some(Arc::clone(&bucket_queue));
 
-  // bucket_queue.push(RequestToken { id: String::from("token 1") }).unwrap();
-  // bucket_queue.push(RequestToken { id: String::from("token 2") }).unwrap();
-  // bucket_queue.push(RequestToken { id: String::from("token 3") }).unwrap();
-
+  let generator = TokenGenerator::new(bucket_queue);
   let _ = tokio::spawn(async move {
     generator.run().await
   });
-
-  service.bucket_queue = Some(bucket_queue);
 
   Server::builder()
     .add_service(TokenProviderServer::new(service))

@@ -24,5 +24,9 @@ concurrent-queue = "2.3.0"
 tonic = "0.10.2"
 prost = "0.12.1"
 
+[dependencies.uuid]
+version = "1.5.0"
+features = ["v4", "fast-rng"]
+
 [build-dependencies]
 tonic-build = "0.10.2"

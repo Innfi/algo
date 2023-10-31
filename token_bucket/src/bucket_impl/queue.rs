@@ -1,12 +1,12 @@
 use concurrent_queue::ConcurrentQueue;
 
 use crate::bucket_impl::RequestToken;
-
-const QUEUE_LEN: usize = 100;
+use super::QUEUE_LEN;
 
 pub trait TokenBucket {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str>;
   fn issue(&self) -> Result<RequestToken, &'static str>;
+  fn len(&self) -> usize;
 }
 
 #[derive(Debug)]
@@ -36,5 +36,9 @@ impl TokenBucket for BucketQueue {
     let token = self.queue.pop().unwrap();
 
     Ok(token)
+  }
+
+  fn len(&self) -> usize {
+    self.queue.len()
   }
 }

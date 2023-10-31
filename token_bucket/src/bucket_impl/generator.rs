@@ -1,41 +1,42 @@
+use std::sync::Arc;
 use std::{thread, time};
-use log::debug;
+use uuid::Uuid;
 
 use crate::bucket_impl::TokenBucket;
 
-use super::BucketQueue;
+use super::{BucketQueue, QUEUE_LEN};
 use super::entity::RequestToken;
 
-pub struct TokenGenerator<'a> {
-  bucket_queue: &'a BucketQueue,
+const DURATION: u64 = 5000;
+
+pub struct TokenGenerator {
+  bucket_queue: Arc<BucketQueue>,
 }
 
-impl<'a> TokenGenerator<'a> {
-  pub fn new(queue: &'a BucketQueue) -> Self {
+impl TokenGenerator {
+  pub fn new(queue: Arc<BucketQueue>) -> Self {
     Self {
-      bucket_queue: queue,
+      bucket_queue: Arc::clone(&queue),
     }
   }
 
-  pub async fn run(&self) -> Result<(), &'static str> {
-    let mut counter = 0;
+  pub async fn run(&self) {
     loop {
-      debug!("TokenGenerator::run] ");
+      println!("TokenGenerator::run] ");
+      thread::sleep(time::Duration::from_millis(DURATION));
 
-      thread::sleep(time::Duration::from_millis(5000));
-
-      counter += 1;
+      if self.bucket_queue.len() >= QUEUE_LEN {
+        continue;
+      }
 
       self.bucket_queue.push(RequestToken {
-        id: format!("token{}", counter),
+        id: self.generate_token(),
       }).unwrap();
-
-      if counter > 100 { //FIXME
-        break;
-      }
     }
+  }
 
-    Ok(())
+  fn generate_token(&self) -> String {
+    Uuid::new_v4().to_string()
   }
 }
 
