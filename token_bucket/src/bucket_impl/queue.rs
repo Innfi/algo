@@ -24,15 +24,23 @@ impl BucketQueue {
 
 impl TokenBucket for BucketQueue {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str> {
-    // naive approach: toss and forget
-    log::debug!("new token: {}", new_token.id);
+    // log::debug!("new token: {}", new_token.id);
+
+    if self.queue.is_full() {
+      // discard and forget
+      return Ok(())
+    }
 
     self.queue.push(new_token).unwrap();
 
-    return Ok(());
+    Ok(())
   }
   
   fn issue(&self) -> Result<RequestToken, &'static str> {
+    if self.queue.is_empty() {
+      return Err("empty queue");
+    }
+
     let token = self.queue.pop().unwrap();
 
     Ok(token)
