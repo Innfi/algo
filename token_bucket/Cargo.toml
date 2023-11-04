@@ -23,6 +23,8 @@ tokio = { version = "1.33.0", features = ["macros", "rt-multi-thread"] }
 concurrent-queue = "2.3.0"
 tonic = "0.10.2"
 prost = "0.12.1"
+ctrlc = "3.4.1"
+rand = "0.8.5"
 
 [dependencies.uuid]
 version = "1.5.0"
