@@ -1,7 +1,6 @@
 use concurrent_queue::ConcurrentQueue;
 
 use crate::bucket_impl::RequestToken;
-use super::QUEUE_LEN;
 
 pub trait TokenBucket {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str>;
@@ -15,17 +14,15 @@ pub struct BucketQueue {
 }
 
 impl BucketQueue {
-  pub fn new() -> Self {
+  pub fn new(queue_len: usize) -> Self {
     Self {
-      queue: ConcurrentQueue::bounded(QUEUE_LEN),
+      queue: ConcurrentQueue::bounded(queue_len),
     }
   }
 }
 
 impl TokenBucket for BucketQueue {
   fn push(&self, new_token: RequestToken) -> Result<(), &'static str> {
-    // log::debug!("new token: {}", new_token.id);
-
     if self.queue.is_full() {
       // discard and forget
       return Ok(())

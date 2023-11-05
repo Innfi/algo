@@ -1,5 +1,7 @@
 use std::sync::Arc;
+use std::env;
 use tonic::{transport::Server, Request, Response, Status};
+use dotenv::dotenv;
 
 use contract::token_provider_server::{TokenProvider, TokenProviderServer};
 use contract::{BookingRequest, BookingResponse};
@@ -48,16 +50,26 @@ impl TokenProvider for ContractStruct {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let addr = "[::1]:50051".parse()?;
+  dotenv().expect("env load failed");
 
-  let bucket_queue = Arc::new(BucketQueue::new());
+  let queue_len: usize = env::var("QUEUE_LEN")
+    .expect("queue_len not found")
+    .parse()
+    .expect("queue_len parse failed");
+  let duration: u64 = env::var("DURATION")
+    .expect("duration not found")
+    .parse()
+    .expect("duration parse failed");
+  let addr = env::var("LISTEN_ADDR").expect("addr not found").parse()?;
+
+  let bucket_queue = Arc::new(BucketQueue::new(queue_len));
 
   let mut service = ContractStruct::default();
   service.bucket_queue = Some(Arc::clone(&bucket_queue));
 
   let generator = TokenGenerator::new(bucket_queue);
   let _ = tokio::spawn(async move {
-    generator.run().await
+    generator.run(duration, queue_len).await
   });
 
   Server::builder()

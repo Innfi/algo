@@ -4,10 +4,8 @@ use uuid::Uuid;
 
 use crate::bucket_impl::TokenBucket;
 
-use super::{BucketQueue, QUEUE_LEN};
+use super::BucketQueue;
 use super::entity::RequestToken;
-
-const DURATION: u64 = 5000;
 
 pub struct TokenGenerator {
   bucket_queue: Arc<BucketQueue>,
@@ -20,12 +18,12 @@ impl TokenGenerator {
     }
   }
 
-  pub async fn run(&self) {
+  pub async fn run(&self, duration: u64, queue_len: usize) {
     loop {
       println!("TokenGenerator::run] ");
-      thread::sleep(time::Duration::from_millis(DURATION));
+      thread::sleep(time::Duration::from_millis(duration));
 
-      if self.bucket_queue.len() >= QUEUE_LEN {
+      if self.bucket_queue.len() >= queue_len {
         continue;
       }
 
