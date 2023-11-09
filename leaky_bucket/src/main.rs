@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, thread, time};
 
 use concurrent_queue::ConcurrentQueue;
 use serde::{Serialize, Deserialize};
@@ -9,7 +9,7 @@ pub struct Payload {
 }
 
 pub struct DestinationGateway {
-  // TODO
+  // TODO: interface for destination (web, protobuf, etc)
 }
 
 impl DestinationGateway {
@@ -17,8 +17,10 @@ impl DestinationGateway {
     Self {}
   }
 
-  pub fn send(&self, _payload: Payload) -> Result<(), &'static str> {
+  pub fn send(&self, payload: Payload) -> Result<(), &'static str> {
     // TODO
+
+    println!("DestincationGateway.send] {:?}", payload);
 
     Ok(())
   }
@@ -51,11 +53,37 @@ impl LeakyBucket {
     Ok(())
   }
 
-  pub fn handle_to_be_renamed(&self) {
-    
+  pub async fn handle_leak(&self) {
+    // FIXME
+    let duration: u64 = 5000;
+    let leak_len: usize = 10;
+
+    loop {
+      println!("LeakyBucket::handle] ");
+
+      for _ in 0..leak_len {
+        if self.queue.is_empty() {
+          break;
+        }
+
+        let payload = self.queue.pop().unwrap();
+        let _ = self.gateway.send(payload);
+      }
+
+      thread::sleep(time::Duration::from_millis(duration));
+    }
   }
 }
 
-fn main() {
-  println!("Hello, world!");
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  let queue_len: usize = 2000;
+  let dest_gateway = Arc::new(DestinationGateway::new());
+  let leaky_bucket = LeakyBucket::new(queue_len, dest_gateway);
+
+  let _ = tokio::spawn(async move {
+    leaky_bucket.handle_leak().await
+  });
+
+  Ok(())
 }
