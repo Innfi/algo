@@ -74,16 +74,3 @@ impl LeakyBucket {
     }
   }
 }
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let queue_len: usize = 2000;
-  let dest_gateway = Arc::new(DestinationGateway::new());
-  let leaky_bucket = LeakyBucket::new(queue_len, dest_gateway);
-
-  let _ = tokio::spawn(async move {
-    leaky_bucket.handle_leak().await
-  });
-
-  Ok(())
-}

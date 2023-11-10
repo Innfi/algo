@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package contract;
+
+service LeakyBucketSender {
+  rpc Send (BucketRequest) returns (SendResponse);
+}
+
+message BucketRequest {
+  string clientId = 1;
+  string reqPayload = 2;
+}
+
+message SendResponse {
+  string clientId = 1;
+  string sendResult = 2;
+}
+
+// TODO: contract definition from server endpoint to client
