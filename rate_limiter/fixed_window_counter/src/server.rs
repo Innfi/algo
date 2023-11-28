@@ -1,3 +1,5 @@
+use core::time;
+use std::{sync::{Mutex, Arc}, thread};
 use log;
 
 const COUNTER_MAX: usize = 10;
@@ -44,5 +46,33 @@ impl Handler {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  let counter_tester: u32 = 0;
+  let counter = Arc::new(Mutex::new(counter_tester));
+  let counter_clone = counter.clone();
+
+  tokio::spawn(async move {
+    counter_checker(counter_clone).await
+  });
+
+  loop {
+    thread::sleep(time::Duration::from_millis(1000));
+
+    let mut counter_mut = counter.lock().unwrap();
+    *counter_mut += 1;
+
+    if *counter_mut > 20 {
+      break;
+    }
+  }
+
   Ok(())
+}
+
+async fn counter_checker(counter: Arc<Mutex<u32>>) {
+  loop {
+    thread::sleep(time::Duration::from_millis(5000));
+
+    let lock_guard = counter.lock().unwrap();
+    println!("counter: {}", *lock_guard);
+  }
 }
