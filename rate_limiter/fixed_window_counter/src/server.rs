@@ -1,14 +1,14 @@
-use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder, middleware::Logger};
 use core::time;
 use std::{sync::{Mutex, Arc}, thread};
 use log;
 
-const COUNTER_MAX: u32 = 10;
+const COUNTER_MAX: usize = 10;
 
 pub struct Request {}
 
 pub struct Handler {
-  counter: u32,
+  counter: usize,
 }
 
 impl Handler {
@@ -44,10 +44,11 @@ impl Handler {
   }
 }
 
-
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let counter_tester: u32 = 0;
+async fn main() -> std::io::Result<()> {
+  env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+  let counter_tester: usize = 0;
   let counter = Arc::new(Mutex::new(counter_tester));
   let counter_clone = counter.clone();
 
@@ -55,46 +56,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     counter_checker(counter_clone).await
   });
 
-  // loop {
-  //   thread::sleep(time::Duration::from_millis(1000));
-
-  //   let mut counter_mut = counter.lock().unwrap();
-  //   *counter_mut += 1;
-
-  //   if *counter_mut > 20 {
-  //     break;
-  //   }
-  // }
-
-  let _ = HttpServer::new(move || {
+  HttpServer::new(move || {
     App::new()
-      .route("/", web::get().to(dummy_couter_gen))
+      .wrap(Logger::new("%a %{User-Agent}i"))
+      .route("/", web::get().to(dummy_counter_gen))
       .app_data(counter.clone())
   })
-  .bind("localhost:8080")?
+  .bind(("127.0.0.1", 8080))?
   .run()
-  .await;
-
-  Ok(())
+  .await
 }
 
-async fn dummy_couter_gen(
-  //counter: Arc<Mutex<u32>>
-  counter: web::Data<Mutex<u32>>,
-) -> HttpResponse {
-  let mut counter_lock = counter.try_lock().unwrap();
+async fn dummy_counter_gen(
+  counter: web::Data<Mutex<usize>>,
+) -> impl Responder {
+  let mut counter_lock = counter.lock().unwrap();
 
-  println!("dummy_counter_gen] {}", *counter_lock);
-  if *counter_lock >= 10 {
-    return HttpResponse::TooManyRequests().into();
-  }
+  // println!("dummy_counter_gen] {}", *counter_lock);
+  // if *counter_lock >= COUNTER_MAX {
+  //   return HttpResponse::TooManyRequests().into();
+  // }
 
-  *counter_lock += 1;
+  // *counter_lock += 1;
 
-  HttpResponse::Ok().into()
+  HttpResponse::Ok().body("hello")
 }
 
-async fn counter_checker(counter: Arc<Mutex<u32>>) {
+async fn counter_checker(counter: Arc<Mutex<usize>>) {
   loop {
     thread::sleep(time::Duration::from_millis(5000));
 
