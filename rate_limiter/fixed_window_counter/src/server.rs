@@ -1,9 +1,9 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, middleware::Logger};
 use core::time;
-use std::{sync::{Mutex, Arc}, thread};
+use std::{sync::Mutex, thread};
 use log;
 
-const COUNTER_MAX: usize = 10;
+const COUNTER_MAX: usize = 5;
 
 pub struct Request {}
 
@@ -49,7 +49,7 @@ async fn main() -> std::io::Result<()> {
   env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
   let counter_tester: usize = 0;
-  let counter = Arc::new(Mutex::new(counter_tester));
+  let counter = web::Data::new(Mutex::new(counter_tester));
   let counter_clone = counter.clone();
 
   tokio::spawn(async move {
@@ -70,24 +70,31 @@ async fn main() -> std::io::Result<()> {
 async fn dummy_counter_gen(
   counter: web::Data<Mutex<usize>>,
 ) -> impl Responder {
-  let mut counter_lock = counter.lock().unwrap();
+  let mut lock = counter.try_lock();
+  if let Ok(ref mut mutex) = lock {
+    if **mutex >= COUNTER_MAX {
+      return HttpResponse::TooManyRequests().into();
+    }
 
-  // println!("dummy_counter_gen] {}", *counter_lock);
-  // if *counter_lock >= COUNTER_MAX {
-  //   return HttpResponse::TooManyRequests().into();
-  // }
+    **mutex += 1;
 
-  // *counter_lock += 1;
+    return HttpResponse::Ok().body("hello");
+  }
 
-  HttpResponse::Ok().body("hello")
+  return HttpResponse::Ok().body("lock failed");
 }
 
-async fn counter_checker(counter: Arc<Mutex<usize>>) {
+async fn counter_checker(counter: web::Data<Mutex<usize>>) {
   loop {
     thread::sleep(time::Duration::from_millis(5000));
 
-    let mut lock_guard = counter.lock().unwrap();
-    *lock_guard = 0;
-    println!("reset")
+    let mut lock = counter.try_lock();
+    if let Ok(ref mut mutex) = lock {
+      **mutex = 0;
+      println!("reset");
+      continue;
+    }
+
+    println!("counter_checker] try_lock failed");
   }
 }
