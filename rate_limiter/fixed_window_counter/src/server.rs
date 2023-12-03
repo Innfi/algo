@@ -5,42 +5,40 @@ use log;
 
 const COUNTER_MAX: usize = 5;
 
-pub struct Request {}
-
-pub struct Handler {
-  counter: usize,
+struct CounterHandler {
+  mutex_handle: Mutex<usize>,
 }
 
-impl Handler {
+impl CounterHandler {
   pub fn new() -> Self {
-    Self { counter: 0 }
+    Self { mutex_handle: Mutex::new(0) }
   }
 
-  pub fn run(&mut self) {
-    loop {
-      if self.counter >= COUNTER_MAX {
-        log::debug!("threshold. continue");
-        continue;
+  pub fn try_increment(&self) -> Result<(), &'static str> {
+    let mut lock = self.mutex_handle.try_lock();
+
+    if let Ok(ref mut mutex) = lock {
+      if **mutex >= COUNTER_MAX {
+        return Err("too_many_request");
       }
 
-      let req = self.receive_request().unwrap();
-
-      self.increment_counter();
-      let _ = self.relay_request(req);
+      **mutex += 1;
+      return Ok(());
     }
+
+    Err("lock_failed")
   }
 
-  pub fn receive_request(&self) -> Result<Request, &'static str> {
-    Ok(Request{}) //FIXME
-  }
+  pub fn try_reset(&self) -> Result<(), &'static str> {
+    let mut lock = self.mutex_handle.try_lock();
 
-  fn increment_counter(&mut self) {
-    self.counter += 1; //FIXME
-  }
+    if let Ok(ref mut mutex) = lock {
+      **mutex = 0;
 
-  fn relay_request(&self, _req: Request) -> Result<(), &'static str> {
+      return Ok(());
+    }
 
-    Ok(())
+    Err("lock_failed")
   }
 }
 
@@ -48,53 +46,48 @@ impl Handler {
 async fn main() -> std::io::Result<()> {
   env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-  let counter_tester: usize = 0;
-  let counter = web::Data::new(Mutex::new(counter_tester));
-  let counter_clone = counter.clone();
+  let counter_handler = web::Data::new(CounterHandler::new());
+  let handler_clone = counter_handler.clone();
 
   tokio::spawn(async move {
-    counter_checker(counter_clone).await
+    counter_checker(handler_clone).await
   });
 
   HttpServer::new(move || {
     App::new()
       .wrap(Logger::new("%a %{User-Agent}i"))
-      .route("/", web::get().to(dummy_counter_gen))
-      .app_data(counter.clone())
+      .route("/", web::get().to(req_handler))
+      .app_data(counter_handler.clone())
   })
   .bind(("127.0.0.1", 8080))?
   .run()
   .await
 }
 
-async fn dummy_counter_gen(
-  counter: web::Data<Mutex<usize>>,
-) -> impl Responder {
-  let mut lock = counter.try_lock();
-  if let Ok(ref mut mutex) = lock {
-    if **mutex >= COUNTER_MAX {
-      return HttpResponse::TooManyRequests().into();
-    }
-
-    **mutex += 1;
-
+async fn req_handler(handler: web::Data<CounterHandler>) -> impl Responder {
+  let try_incr_result = handler.try_increment();
+  if try_incr_result.is_ok() {
     return HttpResponse::Ok().body("hello");
+  }
+
+  let err_msg = try_incr_result.unwrap_err();
+  if err_msg == "too_many_request" {
+    return HttpResponse::TooManyRequests().into();
   }
 
   return HttpResponse::Ok().body("lock failed");
 }
 
-async fn counter_checker(counter: web::Data<Mutex<usize>>) {
+async fn counter_checker(handler: web::Data<CounterHandler>) {
   loop {
     thread::sleep(time::Duration::from_millis(5000));
 
-    let mut lock = counter.try_lock();
-    if let Ok(ref mut mutex) = lock {
-      **mutex = 0;
-      println!("reset");
+    let reset_result = handler.try_reset();
+    if reset_result.is_ok() {
+      log::info!("counter_checker] reset");
       continue;
     }
 
-    println!("counter_checker] try_lock failed");
+    log::info!("try_reset failed");
   }
 }
