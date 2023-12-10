@@ -9,7 +9,7 @@ const WINDOW_LEN: usize = 20;
 
 #[derive(Debug)]
 pub struct ReqCountUnit {
-  id: usize,
+  index: usize,
   count: usize,
 }
 
@@ -18,6 +18,7 @@ pub struct SlidingWindow {
   queue: ConcurrentQueue<ReqCountUnit>,
   sum: usize,
   current: usize,
+  current_index: usize,
 }
 
 struct WindowHandler {
@@ -32,6 +33,7 @@ impl WindowHandler {
           queue: ConcurrentQueue::bounded(WINDOW_LEN* 2),
           sum: 0,
           current: 0,
+          current_index: 0,
         },
       ),
     }
@@ -57,20 +59,38 @@ impl WindowHandler {
     let mut lock = self.mutex_handle.try_lock();
 
     if let Ok(ref mut mutex) = lock {
-      mutex.queue.pop().expect("queue.pop() failed");
-      mutex.queue.push(ReqCountUnit {
-        id: 0,
+      // if mutex.queue.len() > WINDOW_LEN {
+      //   mutex.queue.pop().expect("queue.pop() failed");
+      // }
+
+      let new_unit = ReqCountUnit {
+        index: mutex.current_index,
         count: mutex.current,
-      }).expect("queue.push() failed");
+      };
+      let push_result = mutex.queue.push(new_unit);
+      if push_result.is_err() {
+        println!("push failed: {}", push_result.unwrap_err());
+      } else {
+        println!("push success");
+      }
 
       mutex.sum = mutex.queue
       .try_iter()
       .by_ref()
-      .map(|x| x.count)
+      .map(|x| {
+        println!("id: {}, count: {}", x.index, x.count);
+        x.count
+      })
       .reduce(|a, b| a+b)
       .expect("calculate_sum_failed");
 
+      println!("len: {}", mutex.queue.len());
+      println!("sum: {}", mutex.sum);
+
       mutex.current = 0;
+      mutex.current_index += 1;
+
+      return Ok(())
     }
 
     Err("lock_failed")
