@@ -74,21 +74,33 @@ impl WindowHandler {
         println!("push success");
       }
 
-      mutex.sum = mutex.queue
-      .try_iter()
-      .by_ref()
-      .map(|x| {
-        println!("id: {}, count: {}", x.index, x.count);
-        x.count
-      })
-      .reduce(|a, b| a+b)
-      .expect("calculate_sum_failed");
+      println!("before len: {}", mutex.queue.len());
+      let mut sum = 0;
+      let mut iter = mutex.queue.try_iter();
+      loop {
+        let next = iter.next();
+        if next.is_none() {
+          break;
+        }
 
-      println!("len: {}", mutex.queue.len());
-      println!("sum: {}", mutex.sum);
+        sum += next.unwrap().count;
+      }
 
-      mutex.current = 0;
-      mutex.current_index += 1;
+      // let sum = mutex.queue
+      // .try_iter()
+      // .by_ref()
+      // .map(|x| {
+      //   println!("id: {}, count: {}", x.index, x.count);
+      //   x.count
+      // })
+      // .reduce(|a, b| a+b)
+      // .expect("calculate_sum_failed");
+
+      println!("after len: {}", mutex.queue.len());
+      println!("sum: {}", sum);
+
+      // mutex.current = 0;
+      // mutex.current_index += 1;
 
       return Ok(())
     }
