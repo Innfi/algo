@@ -1,11 +1,11 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder, middleware::Logger};
-use concurrent_queue::ConcurrentQueue;
+use std::collections::VecDeque;
 use core::time;
 use std::{sync::Mutex, thread};
 use log;
 
-const COUNTER_MAX: f64 = 50.0;
-const WINDOW_LEN: usize = 20;
+const COUNTER_MAX: usize = 10;
+const WINDOW_LEN: usize = 5;
 
 #[derive(Debug)]
 pub struct ReqCountUnit {
@@ -15,7 +15,7 @@ pub struct ReqCountUnit {
 
 #[derive(Debug)]
 pub struct SlidingWindow {
-  queue: ConcurrentQueue<ReqCountUnit>,
+  queue: VecDeque<ReqCountUnit>,
   sum: usize,
   current: usize,
   current_index: usize,
@@ -30,7 +30,7 @@ impl WindowHandler {
     Self { 
       mutex_handle: Mutex::new(
         SlidingWindow {
-          queue: ConcurrentQueue::bounded(WINDOW_LEN* 2),
+          queue: VecDeque::new(),
           sum: 0,
           current: 0,
           current_index: 0,
@@ -43,8 +43,9 @@ impl WindowHandler {
     let mut lock = self.mutex_handle.try_lock();
 
     if let Ok(ref mut mutex) = lock {
-      let average: f64 = ((mutex.sum + mutex.current) / WINDOW_LEN) as f64;
-      if average > COUNTER_MAX {
+      let total = mutex.sum + mutex.current; 
+      println!("total: {}", total);
+      if total > COUNTER_MAX {
         return Err("too_many_request");
       }
 
@@ -59,48 +60,27 @@ impl WindowHandler {
     let mut lock = self.mutex_handle.try_lock();
 
     if let Ok(ref mut mutex) = lock {
-      // if mutex.queue.len() > WINDOW_LEN {
-      //   mutex.queue.pop().expect("queue.pop() failed");
-      // }
+      if mutex.queue.len() >= WINDOW_LEN {
+        mutex.queue.pop_front().expect("pop_front failed");
+      }
 
       let new_unit = ReqCountUnit {
         index: mutex.current_index,
         count: mutex.current,
       };
-      let push_result = mutex.queue.push(new_unit);
-      if push_result.is_err() {
-        println!("push failed: {}", push_result.unwrap_err());
-      } else {
-        println!("push success");
-      }
+      mutex.queue.push_back(new_unit);
 
-      println!("before len: {}", mutex.queue.len());
-      let mut sum = 0;
-      let mut iter = mutex.queue.try_iter();
-      loop {
-        let next = iter.next();
-        if next.is_none() {
-          break;
-        }
+      mutex.sum = mutex.queue
+        .iter()
+        .map(|x| {
+          println!("index: {}, count: {}", x.index, x.count);
+          x.count
+        })
+        .reduce(|a, b| a+b)
+        .expect("sum failed");
 
-        sum += next.unwrap().count;
-      }
-
-      // let sum = mutex.queue
-      // .try_iter()
-      // .by_ref()
-      // .map(|x| {
-      //   println!("id: {}, count: {}", x.index, x.count);
-      //   x.count
-      // })
-      // .reduce(|a, b| a+b)
-      // .expect("calculate_sum_failed");
-
-      println!("after len: {}", mutex.queue.len());
-      println!("sum: {}", sum);
-
-      // mutex.current = 0;
-      // mutex.current_index += 1;
+      mutex.current = 0;
+      mutex.current_index += 1;
 
       return Ok(())
     }
