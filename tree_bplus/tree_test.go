@@ -23,6 +23,53 @@ DONE
 
 */
 
+func TestNodeCanHaveKeyValue(t *testing.T) {
+	node := NewTreeNode()
+	node.Insert(KVSet{
+		key:   1,
+		value: "dummy",
+	})
+	assert.Equal(t, node.kvSet[0].key, 1)
+}
+
+func TestNodeLinkAsParentChildren(t *testing.T) {
+	parent := NewTreeNode()
+	parent.Insert(KVSet{
+		key:   1,
+		value: "dummy",
+	})
+
+	child := NewTreeNode()
+	child.Insert(KVSet{
+		key:   3,
+		value: "dummy2",
+	})
+
+	parent.children = child
+	child.parent = parent
+
+	assert.Equal(t, parent.children.kvSet[0].key, 3)
+	assert.Equal(t, child.parent.kvSet[0].key, 1)
+}
+
+// func TestNodeLinkToNext(t *testing.T) {
+// 	node := TreeNode{
+// 		key:   1,
+// 		value: "dummy1",
+// 	}
+//
+// 	node.next = &TreeNode{
+// 		key:   2,
+// 		value: "",
+// 	}
+//
+// 	assert.Equal(t, node.next.key, 2)
+// }
+//
+// func TestNodeMultipleKV(t *testing.T) {
+//
+// }
+
 func TestInit(t *testing.T) {
 	assert.Equal(t, 1, 1)
 }
