@@ -10,7 +10,6 @@ type KVSet struct {
 type TreeNode struct {
 	kvSet []KVSet
 
-	parent   *TreeNode
 	children *TreeNode
 	next     *TreeNode
 }
