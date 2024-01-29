@@ -9,78 +9,36 @@ import (
 /*
 only leaf node can have data value, any node above leaf have keys for index
 each node can have multiple keys, limited by the decree
-when the number of keys reach the decree, divide keys into two subnodes
+when the number of keys reach the limit, divide keys into two subnodes
 each nodes on the same level are sorted, and connected as single linked list
 
 TODO
 --------------------------------------------------------------------------------
-insert, update, delete node while maintaining constraints
-  - 1st step: if the number of kvset reaches the threshold (or the decree),
-	            children whill have divided subset of the kvset
-							node will contain key set only
-assert the search process
+* define node structure
+  - node structure consists of three element:
+	  pointer to parent node
+		pointer to next node
+		key / value set
+	- each value of key / value set can contain only one of:
+	  pointer to child node, or
+		actual value
+* insert, update, delete node while maintaining constraints
+  - insert: before the limit
+* assert the search process
 
 DONE
 --------------------------------------------------------------------------------
-define node structure
-  - node contains links to children, and next node
-	- node contains multiple key / value set (as arrays?)
 
 */
 
-func TestNodeCanHaveKeyValue(t *testing.T) {
-	node := NewTreeNode()
-	node.Insert(KVSet{
-		key:   1,
-		value: "dummy",
-	})
-	assert.Equal(t, node.kvSet[0].key, 1)
-}
+func TestNodeAddValueBeforeLimit(t *testing.T) {
+	node := Node{
+		kvset: make(map[int]ValueDef),
+	}
 
-func TestNodeLinkAsParentChildren(t *testing.T) {
-	parent := NewTreeNode()
-	parent.Insert(KVSet{
-		key:   1,
-		value: "dummy",
-	})
+	node.kvset[1] = ValueDef{
+		data: "initial",
+	}
 
-	child := NewTreeNode()
-	child.Insert(KVSet{
-		key:   3,
-		value: "dummy2",
-	})
-
-	parent.children = child
-
-	assert.Equal(t, parent.children.kvSet[0].key, 3)
-}
-
-func TestNodeLinkToNext(t *testing.T) {
-	root := NewTreeNode()
-	root.Insert(KVSet{
-		key:   1,
-		value: "dummy1",
-	})
-
-	root.next = NewTreeNode()
-	root.next.Insert(KVSet{
-		key:   2,
-		value: "",
-	})
-
-	assert.Equal(t, root.next.kvSet[0].key, 2)
-}
-
-func TestNodeMultipleKV(t *testing.T) {
-	root := NewTreeNode()
-	root.Insert(KVSet{
-		key:   1,
-		value: "value1",
-	})
-	root.Insert(KVSet{
-		key:   2,
-		value: "value2",
-	})
-
-	assert.Equal(t, len(root.kvSet), 2)
+	assert.Equal(t, node.kvset[1].data, "initial")
 }

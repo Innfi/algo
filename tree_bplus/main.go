@@ -2,26 +2,38 @@ package main
 
 import "fmt"
 
-type KVSet struct {
-	key   int
-	value string
+type Node struct {
+	parent *Node
+	next   *Node
+	kvset  map[int]ValueDef
 }
 
-type TreeNode struct {
-	kvSet []KVSet
-
-	children *TreeNode
-	next     *TreeNode
+type ValueDef struct {
+	child *Node
+	data  string
 }
 
-func NewTreeNode() *TreeNode {
-	return &TreeNode{
-		kvSet: []KVSet{},
+type BPlusTree struct {
+	root *Node
+}
+
+func InitBPlusTree() *BPlusTree {
+	return &BPlusTree{
+		root: nil,
 	}
 }
 
-func (node *TreeNode) Insert(kvSet KVSet) {
-	node.kvSet = append(node.kvSet, kvSet)
+func (tree *BPlusTree) Insert(key int, data string) bool {
+	if tree.root == nil {
+		tree.root = &Node{
+			parent: nil,
+			next:   nil,
+			kvset:  make(map[int]ValueDef),
+		}
+	}
+
+	// not implemented
+	return false
 }
 
 func main() {
