@@ -36,6 +36,10 @@ func (tree *BPlusTree) Insert(key int, data string) bool {
 	return false
 }
 
+func SplitKVSet(node *Node) {
+
+}
+
 func main() {
 	fmt.Printf("start from here")
 }
