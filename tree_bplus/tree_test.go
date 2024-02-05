@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,43 +36,61 @@ DONE
 
 */
 
-func TestNodeAddValueBeforeLimit(t *testing.T) {
-	node := Node{
-		kvset: make(map[int]ValueDef),
-	}
+func TestArrayPreset(t *testing.T) {
+	input := make([]KVList, 5)
 
-	node.kvset[1] = ValueDef{
-		data: "initial",
-	}
-
-	assert.Equal(t, node.kvset[1].data, "initial")
+	assert.Equal(t, len(input), 5)
 }
 
-func TestSplitKVSet(t *testing.T) {
+func TestNodeAddValueBeforeLimit(t *testing.T) {
 	node := Node{
-		parent: nil,
-		next:   nil,
-		kvset:  make(map[int]ValueDef),
+		kvList: make([]KVList, 0, 5),
 	}
 
-	node.kvset[1] = ValueDef{
-		child: nil,
-		data:  "first",
-	}
-	node.kvset[2] = ValueDef{
-		child: nil,
-		data:  "second",
-	}
-	node.kvset[3] = ValueDef{
-		child: nil,
-		data:  "third",
-	}
+	node.kvList = append(node.kvList, KVList{
+		key:  1,
+		data: "initial",
+	})
 
-	// keys are not sorted. what now?
-	for index, subset := range node.kvset {
-		fmt.Println("index: ", index)
-		fmt.Println("subset: ", subset.data)
-	}
+	assert.Equal(t, len(node.kvList), 1)
+	assert.Equal(t, node.kvList[0].data, "initial")
+}
 
-	assert.Equal(t, len(node.kvset), 3)
+func TestSplitKVList(t *testing.T) {
+	node := CreateNode()
+
+	// not implementing node.Append()
+	// as splitting kvlist is part of the append process
+	node.kvList = append(node.kvList, KVList{
+		key:  1,
+		data: "first",
+	})
+	node.kvList = append(node.kvList, KVList{
+		key:  2,
+		data: "second",
+	})
+	node.kvList = append(node.kvList, KVList{
+		key:  3,
+		data: "third",
+	})
+	node.kvList = append(node.kvList, KVList{
+		key:  4,
+		data: "fourth",
+	})
+	node.kvList = append(node.kvList, KVList{
+		key:  5,
+		data: "fifth",
+	})
+
+	SplitKVList(node)
+
+	// after the node split, kvlist should be divided in half
+	assert.Equal(t, len(node.kvList), 2)
+	assert.Equal(t, node.kvList[0].data, "")
+	assert.Equal(t, node.kvList[1].data, "")
+
+	assert.Equal(t, node.kvList[0].child != nil, true)
+	assert.Equal(t, node.kvList[1].child != nil, true)
+
+	// testing leaf node
 }

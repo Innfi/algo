@@ -2,13 +2,24 @@ package main
 
 import "fmt"
 
+const KVLIST_DEGREE = 5
+
 type Node struct {
 	parent *Node
 	next   *Node
-	kvset  map[int]ValueDef
+	kvList []KVList
 }
 
-type ValueDef struct {
+func CreateNode() *Node {
+	return &Node{
+		parent: nil,
+		next:   nil,
+		kvList: make([]KVList, 0, KVLIST_DEGREE),
+	}
+}
+
+type KVList struct {
+	key   int
 	child *Node
 	data  string
 }
@@ -28,7 +39,7 @@ func (tree *BPlusTree) Insert(key int, data string) bool {
 		tree.root = &Node{
 			parent: nil,
 			next:   nil,
-			kvset:  make(map[int]ValueDef),
+			kvList: make([]KVList, 0, KVLIST_DEGREE),
 		}
 	}
 
@@ -36,7 +47,7 @@ func (tree *BPlusTree) Insert(key int, data string) bool {
 	return false
 }
 
-func SplitKVSet(node *Node) {
+func SplitKVList(node *Node) {
 
 }
 
