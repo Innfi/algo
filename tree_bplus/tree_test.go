@@ -93,4 +93,16 @@ func TestSplitKVList(t *testing.T) {
 	assert.Equal(t, node.kvList[1].child != nil, true)
 
 	// testing leaf node
+	firstChild := node.kvList[0].child
+	assert.Equal(t, len(firstChild.kvList), 2)
+	assert.Equal(t, firstChild.kvList[0].key, 1)
+	assert.Equal(t, firstChild.kvList[0].data, "first")
+
+	secondChild := node.kvList[1].child
+	assert.Equal(t, len(secondChild.kvList), 3)
+	assert.Equal(t, secondChild.kvList[1].key, 4)
 }
+
+// func TestSplitKVListOrder(t *testing.T) {
+// 	// keys should be sorted regardless of input order
+// }

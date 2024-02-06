@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const KVLIST_DEGREE = 5
 
@@ -48,7 +50,34 @@ func (tree *BPlusTree) Insert(key int, data string) bool {
 }
 
 func SplitKVList(node *Node) {
+	listLen := len(node.kvList)
+	middle := uint32(listLen / 2)
 
+	leftNode := CreateNode()
+	for _, elem := range node.kvList[0:middle] {
+		leftNode.kvList = append(leftNode.kvList, KVList{
+			key:  elem.key,
+			data: elem.data,
+		})
+	}
+	rightNode := CreateNode()
+	for _, elem := range node.kvList[middle:listLen] {
+		rightNode.kvList = append(rightNode.kvList, KVList{
+			key:  elem.key,
+			data: elem.data,
+		})
+	}
+	leftNode.next = rightNode
+
+	node.kvList = make([]KVList, 0, KVLIST_DEGREE)
+	node.kvList = append(node.kvList, KVList{
+		key:   leftNode.kvList[0].key,
+		child: leftNode,
+	})
+	node.kvList = append(node.kvList, KVList{
+		key:   rightNode.kvList[0].key,
+		child: rightNode,
+	})
 }
 
 func main() {
