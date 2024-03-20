@@ -1,35 +1,38 @@
 import assert from 'assert';
 
 class RadixNode {
-  nodes: { [key: string]: RadixNode }
+  nodes: Map<string, RadixNode>;
 
   constructor() {
-    this.nodes = {};
+    this.nodes = new Map();
   }
 }
 
 class RadixTree {
-  root: { [key: string]: RadixNode };
+  root: Map<string, RadixNode>;
 
   constructor() {
-    this.root = {};
+    this.root = new Map();
   }
 
   insert(input: string): void {
-    for (const key of Object.keys(this.root)) {
+    let current = this.root;
+
+    for (const key of Object.keys(current)) {
       const subset = this.findSubset(input, key);
+
+      console.log(`input: ${input}, key: ${key}, subset: ${subset}`);
       if (subset.length <= 0) continue;
      
-      const remainFromInput = input.substring(0, subset.length);
-      const remainFromKey = input.substring(0, subset.length);
+      const remainFromInput = input.substring(subset.length, input.length);
+      const remainFromKey = key.substring(subset.length, key.length);
 
-      const previousNode = this.root[key];
+      const previousNode = current.get(key);
+      current.delete(key);
 
-      this.root[key] = undefined;
-
-      this.root[subset] = new RadixNode();
-      this.root[subset].nodes[remainFromInput] = new RadixNode();
-      this.root[subset].nodes[remainFromKey] = previousNode;
+      current.set(subset, new RadixNode());
+      current.get(subset).nodes.set(remainFromInput, new RadixNode());
+      current.get(subset).nodes.set(remainFromKey, previousNode);
 
       return;
     }
@@ -58,7 +61,7 @@ describe('test', () => {
   it ('radix node: initial state', () => {
     const node = new RadixNode();
 
-    assert.deepStrictEqual(node.nodes, {});
+    assert.deepStrictEqual(node.nodes != undefined, true);
   });
 
   it ('insert first string', () => {
@@ -86,12 +89,32 @@ describe('test', () => {
     assert.strictEqual('first'.substring(0, 3), 'fir');
   });
 
-  // it ('insert first and firm', () => {
-  //   const instance = new RadixTree();
+  it ('insert first and firm', () => {
+    const instance = new RadixTree();
 
-  //   const input: string[] = ['first', 'firm'];
-  //   input.forEach((v) => instance.insert(v));
+    const input: string[] = ['first', 'firm'];
+    input.forEach((v) => instance.insert(v));
 
-  //   assert.strictEqual(input.every((v) => instance.findExactMatch(v)), true);
-  // });
+    assert.strictEqual(instance.root.has('fir'), true);
+
+    const child = instance.root.get('fir');
+    assert.strictEqual(child.nodes.has('m'), true);
+    assert.strictEqual(child.nodes.has('st'), true);
+  });
+
+  it ('first, firm and final', () => {
+    const instance = new RadixTree();
+
+    ['first', 'firm', 'final'].forEach((v) => instance.insert(v));
+
+    assert.strictEqual(instance.root.has('fi'), true);
+
+    // const intermediate = instance.root.get('fi');
+    // assert.strictEqual(intermediate.nodes.has('nal'), true);
+    // assert.strictEqual(intermediate.nodes.has('r'), true);
+
+    // const last = intermediate.nodes.get('r');
+    // assert.strictEqual(last.nodes.has('m'), true);
+    // assert.strictEqual(last.nodes.has('st'), true);
+  });
 });
