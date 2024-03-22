@@ -1,43 +1,77 @@
 import assert from 'assert';
 
 class RadixNode {
-  nodes: Map<string, RadixNode>;
+  public key: string;
+  public nodes: RadixNode[];
 
-  constructor() {
-    this.nodes = new Map();
+  constructor(key: string) {
+    this.key = key;
+    this.nodes = [];
+  }
+
+  findNode(key: string): RadixNode {
+    return this.nodes.find((v) => v.key === key);
+  }
+
+  print(): void {
+    this.nodes.forEach((v) => {
+      console.log(`key: ${this.key}. node key: ${v.key}`);
+      v.print();
+    });
   }
 }
 
 class RadixTree {
-  root: Map<string, RadixNode>;
+  root: RadixNode[];
 
   constructor() {
-    this.root = new Map();
+    this.root = [];
   }
 
   insert(input: string): void {
-    let current = this.root;
+    // console.log(`len: ${this.root.length}. insert: ${input}`);
+    for (const node of this.root) {
+      // console.log(`node.key: ${node.key}`);
+      const subset = this.findSubset(input, node.key);
 
-    for (const key of Object.keys(current)) {
-      const subset = this.findSubset(input, key);
-
-      console.log(`input: ${input}, key: ${key}, subset: ${subset}`);
       if (subset.length <= 0) continue;
-     
-      const remainFromInput = input.substring(subset.length, input.length);
-      const remainFromKey = key.substring(subset.length, key.length);
 
-      const previousNode = current.get(key);
-      current.delete(key);
-
-      current.set(subset, new RadixNode());
-      current.get(subset).nodes.set(remainFromInput, new RadixNode());
-      current.get(subset).nodes.set(remainFromKey, previousNode);
-
+      this.insertRecursive(node, input, subset);
       return;
     }
 
-    this.root[input] = new RadixNode();
+    this.root.push(new RadixNode(input));
+  }
+
+  private insertRecursive(node: RadixNode, input: string, subset: string): void {
+    // console.log(`--- key: ${node.key}, input: ${input}, subset: ${subset}`);
+
+    // assume node.key.len > subset.len
+
+    const remainFromInput = input.substring(subset.length, input.length);
+    const remainFromKey = node.key.substring(subset.length, node.key.length);
+    // console.log(`--- remainFromInput: ${remainFromInput}`);
+    // console.log(`--- remainFromKey: ${remainFromKey}`);
+
+    node.key = subset;
+
+    if (remainFromKey.length > 0) {
+      const intermediate = new RadixNode(remainFromKey);
+      intermediate.nodes = node.nodes;
+
+      node.nodes = [intermediate];
+    } else {
+      for (const subnode of node.nodes) {
+        const innerSubset = this.findSubset(subset, subnode.key);
+
+        if (innerSubset.length <= 0) continue;
+
+        this.insertRecursive(subnode, subset, innerSubset);
+        break;
+      }
+    }
+
+    node.nodes.push(new RadixNode(remainFromInput));
   }
 
   private findSubset(input: string, key: string): string {
@@ -52,69 +86,80 @@ class RadixTree {
     return common;
   }
 
-  findExactMatch(key: string): boolean {
-    return false;
+  print(): void {
+    this.root.forEach((v) => v.print());
   }
 }
 
 describe('test', () => {
   it ('radix node: initial state', () => {
-    const node = new RadixNode();
+    const key = 'initial';
+    const node = new RadixNode(key);
 
-    assert.deepStrictEqual(node.nodes != undefined, true);
+    assert.strictEqual(node.key, key);
+    assert.deepStrictEqual(node.nodes, []);
   });
 
-  it ('insert first string', () => {
+  // it ('first', () => {
+  //   const instance = new RadixTree();
+
+  //   const input = 'first';
+  //   instance.insert(input);
+
+  //   assert.strictEqual(instance.root.findIndex((v) => v.key === input) >= 0, true);
+  // });
+
+  // it ('first and firm', () => {
+  //   const instance = new RadixTree;
+
+  //   ['first', 'firm'].forEach((v) => instance.insert(v));
+
+  //   const subset = 'fir';
+  //   const remainFirst = 'st';
+  //   const remainSecond = 'm';
+
+  //   const commonNode = instance.root.find((v) => v.key === subset);
+  //   assert.strictEqual(commonNode.key, subset);
+
+  //   assert.strictEqual(commonNode.findNode(remainFirst) !== undefined, true);
+  //   assert.strictEqual(commonNode.findNode(remainSecond) !== undefined, true);
+  // });
+
+  // it ('first, firm, and final', () => {
+  //   const instance = new RadixTree();
+
+  //   [
+  //     'first', 
+  //     'firm', 
+  //     'final',
+  //   ].forEach((v) => instance.insert(v));
+
+  //   const subset1 = 'fi';
+  //   const subset2 = 'r';
+  //   const subset3 = 'nal';
+
+  //   const node1 = instance.root.find((v) => v.key === subset1);
+  //   assert.strictEqual(node1 !== undefined, true);
+
+  //   const node2 = node1.findNode(subset2);
+  //   assert.strictEqual(node2 !== undefined, true);
+  //   assert.strictEqual(node2.findNode('st') !== undefined, true);
+  //   assert.strictEqual(node2.findNode('m') !== undefined, true);
+
+  //   const node3 = node1.findNode(subset3);
+  //   assert.strictEqual(node3 !== undefined, true);
+  // });
+
+  it ('first, firm, final, and finite', () => {
     const instance = new RadixTree();
 
-    const input = 'first';
-    instance.insert(input);
+    [
+      'first', 
+      'firm', 
+      'final',
+      'finite',
+    ].forEach((v) => instance.insert(v));
 
-    assert.strictEqual(instance.root[input] != undefined, true)
-  });
-
-  it ('insert second string', () => {
-    const instance = new RadixTree();
-
-    const first = 'first';
-    const second = 'second';
-    instance.insert(first);
-    instance.insert(second);
-
-    assert.strictEqual(instance.root[first] != undefined, true);
-    assert.strictEqual(instance.root[second] != undefined, true);
-  });
-
-  it ('javascript substring', () => {
-    assert.strictEqual('first'.substring(0, 3), 'fir');
-  });
-
-  it ('insert first and firm', () => {
-    const instance = new RadixTree();
-
-    const input: string[] = ['first', 'firm'];
-    input.forEach((v) => instance.insert(v));
-
-    assert.strictEqual(instance.root.has('fir'), true);
-
-    const child = instance.root.get('fir');
-    assert.strictEqual(child.nodes.has('m'), true);
-    assert.strictEqual(child.nodes.has('st'), true);
-  });
-
-  it ('first, firm and final', () => {
-    const instance = new RadixTree();
-
-    ['first', 'firm', 'final'].forEach((v) => instance.insert(v));
-
-    assert.strictEqual(instance.root.has('fi'), true);
-
-    // const intermediate = instance.root.get('fi');
-    // assert.strictEqual(intermediate.nodes.has('nal'), true);
-    // assert.strictEqual(intermediate.nodes.has('r'), true);
-
-    // const last = intermediate.nodes.get('r');
-    // assert.strictEqual(last.nodes.has('m'), true);
-    // assert.strictEqual(last.nodes.has('st'), true);
+    instance.print();
   });
 });
