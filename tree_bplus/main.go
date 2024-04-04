@@ -45,8 +45,24 @@ func (tree *BPlusTree) Insert(key int, data string) bool {
 		}
 	}
 
-	// not implemented
-	return false
+	return tree.insertRecursive(tree.root, key, data)
+}
+
+func (tree *BPlusTree) insertRecursive(node *Node, key int, data string) bool {
+	node.kvList = append(node.kvList, KVList{
+		key:  key,
+		data: data,
+	})
+
+	if len(node.kvList) < KVLIST_DEGREE {
+		return true
+	}
+
+	SplitKVList(node)
+
+	//TODO: check threshold event to parent
+
+	return true
 }
 
 func SplitKVList(node *Node) {
