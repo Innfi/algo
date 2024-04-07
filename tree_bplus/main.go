@@ -10,6 +10,7 @@ type Node struct {
 	parent *Node
 	next   *Node
 	kvList []KVList
+	isLeaf bool
 }
 
 func CreateNode() *Node {
@@ -58,9 +59,7 @@ func (tree *BPlusTree) insertRecursive(node *Node, key int, data string) bool {
 		return true
 	}
 
-	SplitKVList(node)
-
-	//TODO: check threshold event to parent
+	// splitting node by half
 
 	return true
 }
