@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	ref "algo/tree-bplus/src"
 )
 
 /*
@@ -106,3 +108,33 @@ func TestSplitKVList(t *testing.T) {
 // func TestSplitKVListOrder(t *testing.T) {
 // 	// keys should be sorted regardless of input order
 // }
+
+func TestReference(t *testing.T) {
+	instance := ref.NewBTree()
+
+	instance.Insert(1)
+	instance.Insert(5)
+	instance.Insert(10)
+	instance.Insert(7)
+
+	root := instance.Root()
+	keys := root.Keys()
+	pointers := root.Pointers()
+
+	assert.Equal(t, len(keys), 1)
+	assert.Equal(t, len(pointers), 2)
+
+	assert.Equal(t, keys[0], 7)
+
+	firstChild := pointers[0]
+	firstKeys := firstChild.Keys()
+	firstPointers := firstChild.Pointers()
+
+	assert.Equal(t, len(firstKeys), 2)
+	assert.Equal(t, len(firstPointers), 0)
+	assert.Equal(t, firstKeys[0], 1)
+	assert.Equal(t, firstKeys[1], 5)
+
+	nextChild := firstChild.Next()
+	assert.Equal(t, nextChild, pointers[1])
+}

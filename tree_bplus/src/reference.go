@@ -8,12 +8,28 @@ type Node struct {
 	next     *Node // for leaf nodes
 }
 
+func (node Node) Keys() []int {
+	return node.keys
+}
+
+func (node Node) Pointers() []*Node {
+	return node.pointers
+}
+
+func (node Node) Next() *Node {
+	return node.next
+}
+
 type BTree struct {
 	root *Node
 }
 
 func NewBTree() *BTree {
 	return &BTree{}
+}
+
+func (t *BTree) Root() *Node {
+	return t.root
 }
 
 func (t *BTree) Insert(key int) {
@@ -106,12 +122,5 @@ func (t *BTree) splitInternalNode(node *Node) {
 
 	if len(parent.keys) > 3 {
 		t.splitInternalNode(parent)
-	}
-}
-
-func tester() {
-	tree := NewBTree()
-	for _, v := range []int{10, 20, 30, 40, 50, 60, 70, 80, 90} {
-		tree.Insert(v)
 	}
 }
